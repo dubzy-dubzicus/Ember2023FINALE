@@ -63,7 +63,7 @@ namespace Ember2023
 
             app.MapControllers();
             
-            // RoomDB.ImportRooms(Path.Combine(dataDir, "Imports", "ImportRooms.json"));
+            RoomDB.ImportRooms(Path.Combine(dataDir, "Imports", "ImportRooms.json")).Wait();
                         
             Task.Run(() => Cloudflare.StartCloudflared());
             
