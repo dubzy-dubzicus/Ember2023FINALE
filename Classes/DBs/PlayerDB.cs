@@ -105,12 +105,19 @@ namespace Ember2023.Classes.DBs
         
         public static List<PlayerDTOBase> GetAccountsBulk(List<long> playerIds)
         {
-            var players = Players.Find(x => playerIds.Contains(x.PlayerId)).ToList();
-            
-            return players
-                .Select(p => MapToDTO(p, false))
-                .OrderBy(a => a.accountId)
-                .ToList();
+            try
+            {
+                var players = Players.Find(x => playerIds.Contains(x.PlayerId)).ToList();
+
+                return players
+                    .Select(p => MapToDTO(p, false))
+                    .OrderBy(a => a.accountId)
+                    .ToList();
+            }
+            catch
+            {
+                return new List<PlayerDTOBase>();
+            }
         }
         
         public static PlayerMeDTO? GetAccountMe(long accountId)
