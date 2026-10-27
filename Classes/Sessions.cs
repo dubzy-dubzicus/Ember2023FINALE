@@ -1,9 +1,9 @@
-using FemRec2023.Classes.DBs;
-using FemRec2023.Classes.DBs.DBClasses;
-using static FemRec2023.Classes.DBs.DBClasses.PlayerDBClasses;
-using static FemRec2023.Classes.DBs.DBClasses.RoomDBClasses;
+using Ember2023.Classes.DBs;
+using Ember2023.Classes.DBs.DBClasses;
+using static Ember2023.Classes.DBs.DBClasses.PlayerDBClasses;
+using static Ember2023.Classes.DBs.DBClasses.RoomDBClasses;
 
-namespace FemRec2023.Classes
+namespace Ember2023.Classes
 {
     public class Sessions
     {
@@ -30,7 +30,7 @@ namespace FemRec2023.Classes
                 location = sub.UnitySceneId,
                 maxCapacity = sub.MaxPlayers,
                 photonRegion = "eu", photonRegionId = "eu",
-                photonRoomId = $"FemRecRoom-{roomName}-{photonSuffix}",
+                photonRoomId = $"EmberRoom-{roomName}-{photonSuffix}",
                 roomId = (long)roomData.RoomId,
                 roomInstanceId = instanceNumber,
                 subRoomId = (long)sub.SubRoomId
@@ -56,7 +56,7 @@ namespace FemRec2023.Classes
                 maxCapacity = 4,
                 Name = $"@{name}'s Dorm",
                 photonRegion = "eu", photonRegionId = "eu",
-                photonRoomId = $"FemRecDorm-{instanceId}-room",
+                photonRoomId = $"EmberDorm-{instanceId}-room",
                 roomId = dormId,
                 roomInstanceId = instanceId,
                 subRoomId = (long)(dorm?.SubRooms?.FirstOrDefault()?.SubRoomId ?? 0)

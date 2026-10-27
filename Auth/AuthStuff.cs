@@ -4,10 +4,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using FemRec2023.Classes.DBs;
-using static FemRec2023.Classes.DBs.DBClasses.PlayerDBClasses;
+using Ember2023.Classes.DBs;
+using static Ember2023.Classes.DBs.DBClasses.PlayerDBClasses;
 
-namespace FemRec2023.Auth
+namespace Ember2023.Auth
 {
     public static class AuthStuff
     {

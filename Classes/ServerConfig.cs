@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FemRec2023.Classes
+namespace Ember2023.Classes
 {
     public class ServerConfig
     {

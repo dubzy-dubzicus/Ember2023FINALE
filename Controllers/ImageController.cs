@@ -5,7 +5,7 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace FemRec2023.Controllers
+namespace Ember2023.Controllers
 {
 	[ApiController]
     public class ImageController : ControllerBase

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using FemRec2023.Classes;
-using FemRec2023.Classes.DBs;
-using FemRec2023.Classes.DBs.DBClasses;
-using FemRec2023.Auth;
+using Ember2023.Classes;
+using Ember2023.Classes.DBs;
+using Ember2023.Classes.DBs.DBClasses;
+using Ember2023.Auth;
 
-namespace FemRec2023.Controllers
+namespace Ember2023.Controllers
 {
     [ApiController]
     [Route("/auth")]

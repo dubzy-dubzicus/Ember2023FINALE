@@ -1,10 +1,10 @@
 using System;
 using LiteDB;
-using FemRec2023.Classes;
-using FemRec2023.Classes.DBs.DBClasses;
-using static FemRec2023.Classes.DBs.DBClasses.PlayerDBClasses;
+using Ember2023.Classes;
+using Ember2023.Classes.DBs.DBClasses;
+using static Ember2023.Classes.DBs.DBClasses.PlayerDBClasses;
 
-namespace FemRec2023.Classes.DBs
+namespace Ember2023.Classes.DBs
 {
     public class PlayerDB
     {
