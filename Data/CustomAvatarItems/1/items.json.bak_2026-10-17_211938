@@ -1,0 +1,29 @@
+[
+  {
+    "Name": "tgest",
+    "Description": "eres",
+    "Price": 0,
+    "BaseAvatarItemId": 2184,
+    "BaseAvatarItemColor": "#191717",
+    "Accessibility": 0,
+    "CustomAvatarItemId": 1792285315384,
+    "Id": 1792285315384,
+    "CreatorPlayerId": 1,
+    "CreatorAccountId": 1,
+    "CreatedAt": "2026-10-18T01:01:55.3844764Z",
+    "ThumbnailImage": "CustomAvatarItems/1/1792285315384.png"
+  },
+  {
+    "Name": "custom shirt test before png upload on s",
+    "Description": "",
+    "Price": 0,
+    "BaseAvatarItemId": 2184,
+    "BaseAvatarItemColor": "#191717",
+    "Accessibility": 0,
+    "CustomAvatarItemId": 1792286151814,
+    "Id": 1792286151814,
+    "CreatorPlayerId": 1,
+    "CreatorAccountId": 1,
+    "CreatedAt": "2026-10-18T01:15:51.8227688Z"
+  }
+]

@@ -1,112 +1,211 @@
-{
-  "MessageOfTheDay": "a",
-  "CdnBaseUri": "https://logan2021.obfacus.com",
-  "ShareBaseUrl": "https://logan2021.obfacus.com/share/0",
+﻿{
+  "MessageOfTheDay": "hey",
+  "CdnBaseUri": "https://playEMBER.xyz",
+  "ShareBaseUrl": "https://playEMBER.xyz/share/0",
   "LevelProgressionMaps": [
     {
       "Level": 0,
-      "RequiredXp": 1,
-      "GiftDropId": null
+      "RequiredXp": 0
     },
     {
       "Level": 1,
-      "RequiredXp": 2,
-      "GiftDropId": 0
+      "RequiredXp": 1
     },
     {
       "Level": 2,
-      "RequiredXp": 3,
-      "GiftDropId": 0
+      "RequiredXp": 3
     },
     {
       "Level": 3,
-      "RequiredXp": 4,
-      "GiftDropId": 0
+      "RequiredXp": 6
     },
     {
       "Level": 4,
-      "RequiredXp": 5,
-      "GiftDropId": 0
+      "RequiredXp": 9
     },
     {
       "Level": 5,
-      "RequiredXp": 6,
-      "GiftDropId": 0
+      "RequiredXp": 12
     },
     {
       "Level": 6,
-      "RequiredXp": 7,
-      "GiftDropId": 0
+      "RequiredXp": 16
     },
     {
       "Level": 7,
-      "RequiredXp": 8,
-      "GiftDropId": 0
+      "RequiredXp": 19
     },
     {
       "Level": 8,
-      "RequiredXp": 9,
-      "GiftDropId": 0
+      "RequiredXp": 28
     },
     {
       "Level": 9,
-      "RequiredXp": 10,
-      "GiftDropId": 0
+      "RequiredXp": 42
     },
     {
       "Level": 10,
-      "RequiredXp": 11,
-      "GiftDropId": 0
+      "RequiredXp": 63
     },
     {
       "Level": 11,
-      "RequiredXp": 12,
-      "GiftDropId": 0
+      "RequiredXp": 94
     },
     {
       "Level": 12,
-      "RequiredXp": 13,
-      "GiftDropId": 0
+      "RequiredXp": 141
     },
     {
       "Level": 13,
-      "RequiredXp": 14,
-      "GiftDropId": 0
+      "RequiredXp": 211
     },
     {
       "Level": 14,
-      "RequiredXp": 15,
-      "GiftDropId": 0
+      "RequiredXp": 316
     },
     {
       "Level": 15,
-      "RequiredXp": 16,
-      "GiftDropId": 0
+      "RequiredXp": 474
     },
     {
       "Level": 16,
-      "RequiredXp": 17,
-      "GiftDropId": 0
+      "RequiredXp": 711
     },
     {
       "Level": 17,
-      "RequiredXp": 18,
-      "GiftDropId": 0
+      "RequiredXp": 1066
     },
     {
       "Level": 18,
-      "RequiredXp": 19,
-      "GiftDropId": 0
+      "RequiredXp": 1599
     },
     {
       "Level": 19,
-      "RequiredXp": 20,
-      "GiftDropId": 0
+      "RequiredXp": 2398
     },
     {
       "Level": 20,
-      "RequiredXp": 21,
-      "GiftDropId": 0
+      "RequiredXp": 3597
+    },
+    {
+      "Level": 21,
+      "RequiredXp": 5395
+    },
+    {
+      "Level": 22,
+      "RequiredXp": 8092
+    },
+    {
+      "Level": 23,
+      "RequiredXp": 12138
+    },
+    {
+      "Level": 24,
+      "RequiredXp": 18207
+    },
+    {
+      "Level": 25,
+      "RequiredXp": 27310
+    },
+    {
+      "Level": 26,
+      "RequiredXp": 40965
+    },
+    {
+      "Level": 27,
+      "RequiredXp": 61447
+    },
+    {
+      "Level": 28,
+      "RequiredXp": 92170
+    },
+    {
+      "Level": 29,
+      "RequiredXp": 138255
+    },
+    {
+      "Level": 30,
+      "RequiredXp": 207382
+    },
+    {
+      "Level": 31,
+      "RequiredXp": 311073
+    },
+    {
+      "Level": 32,
+      "RequiredXp": 466609
+    },
+    {
+      "Level": 33,
+      "RequiredXp": 699913
+    },
+    {
+      "Level": 34,
+      "RequiredXp": 1049869
+    },
+    {
+      "Level": 35,
+      "RequiredXp": 1574803
+    },
+    {
+      "Level": 36,
+      "RequiredXp": 2362204
+    },
+    {
+      "Level": 37,
+      "RequiredXp": 3543306
+    },
+    {
+      "Level": 38,
+      "RequiredXp": 5314959
+    },
+    {
+      "Level": 39,
+      "RequiredXp": 7972438
+    },
+    {
+      "Level": 40,
+      "RequiredXp": 11958657
+    },
+    {
+      "Level": 41,
+      "RequiredXp": 17937986
+    },
+    {
+      "Level": 42,
+      "RequiredXp": 26906980
+    },
+    {
+      "Level": 43,
+      "RequiredXp": 40360472
+    },
+    {
+      "Level": 44,
+      "RequiredXp": 60540708
+    },
+    {
+      "Level": 45,
+      "RequiredXp": 90811064
+    },
+    {
+      "Level": 46,
+      "RequiredXp": 136216592
+    },
+    {
+      "Level": 47,
+      "RequiredXp": 204324896
+    },
+    {
+      "Level": 48,
+      "RequiredXp": 306487360
+    },
+    {
+      "Level": 49,
+      "RequiredXp": 459731040
+    },
+    {
+      "Level": 50,
+      "RequiredXp": 689596544
     }
   ],
   "MatchmakingParams": {
@@ -234,7 +333,7 @@
       }
     ]
   ],
-  "ServerMaintainence": {
+  "ServerMaintenanceOFF": {
     "StartsInMinutes": 0
   },
   "AutoMicMutingConfig": {
@@ -248,7 +347,7 @@
     "MicSpamWarningStateVolumeMultiplier": 10.0
   },
   "StorefrontConfig": {
-    "MinPlayerLevelForGifting": 0
+    "MinPlayerLevelForGifting": 5
   },
   "RoomKeyConfig": {
     "MaxKeysPerRoom": 100
@@ -270,5 +369,8 @@
     "CloudRegion": "us",
     "CrcCheckEnabled": false,
     "EnableServerTracingAfterDisconnect": false
+  },
+  "ServerMaintenance": {
+    "StartsInMinutes": 0
   }
 }

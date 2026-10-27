@@ -41,7 +41,7 @@
   },
   {
     "Key": "Door.Shooters.Title",
-    "Value": "i like guys"
+    "Value": "Import Rooms!"
   },
   {
     "Key": "Door.Sports.Query",
@@ -165,7 +165,7 @@
   },
   {
     "Key": "GDK_Enable_RRPlus",
-    "Value": "false"
+    "Value": "true"
   },
   {
     "Key": "Door.StuntRunner.Title",
@@ -1201,7 +1201,7 @@
   },
   {
     "Key": "UseNewPhotonAuthToken",
-    "Value": "false"
+    "Value": "true"
   },
   {
     "Key": "Player.ShouldWaitForCameraFirstSpawn",

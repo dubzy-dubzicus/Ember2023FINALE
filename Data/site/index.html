@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ember</title>
+<style>
+/* Layout modelled on the Rec Room site: dark shell, red notice bar, a row of
+   hero cards, small pill filters, then a narrow room rail beside a wide photo
+   feed. Ember orange is kept as the accent.
+
+   Nothing animates - the global reset below kills transitions and animations
+   so the page is completely still. */
+:root{
+  /* Gradient sampled straight out of the Ember mark: a vertical magenta ->
+     purple -> blue -> cyan ramp. Left/right colours match at every scanline,
+     so it is a top-to-bottom gradient, not diagonal. */
+  --g1:#ff3ef1;   /* 0%   hot magenta */
+  --g3:#c264ea;   /* 25%  purple */
+  --g5:#7793e3;   /* 50%  periwinkle */
+  --g7:#46b2d9;   /* 75%  sky */
+  --g8:#09dbdb;   /* 100% cyan */
+
+  --bg:#14141d;
+  --bg2:#1a1a26;
+  --bar:#22222f;
+  --panel:#1e1e2a;
+  --card:#262634;
+  --line:#37374a;
+  --line2:#4a4a63;
+  --ink:#f4f2fb;
+  --muted:#a9a4c4;
+  --dim:#7b769a;
+
+  --accent:#b26ee7;        /* mid purple - legible as text/border on dark */
+  --accent-hot:#ff3ef1;
+  --accent-cool:#09dbdb;
+  --on-accent:#120a1c;     /* text sitting on a solid accent fill */
+  --notice:#9b2fd0;
+  --ok:#3ddc97;
+
+  --ember:linear-gradient(150deg,var(--g1),var(--g3) 45%,var(--g8));
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+/* No motion anywhere. */
+*,*::before,*::after{animation:none!important;transition:none!important}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font:15px/1.5 "Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  min-height:100vh;
+}
+a{color:var(--accent);text-decoration:none}
+button{font-family:inherit}
+
+/* ---------------------------------------------------------------- top bar */
+.topbar{
+  background:var(--bar);
+  border-bottom:1px solid #0e0e16;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:10px 20px;
+}
+.brand{
+  display:flex;align-items:center;gap:9px;
+  font-weight:700;font-size:17px;letter-spacing:.06em;
+  color:var(--ink);
+}
+.brand .mark{
+  width:26px;height:26px;border-radius:6px;
+  background:var(--ember);
+  display:grid;place-items:center;
+  font-size:14px;color:var(--on-accent);font-weight:800;
+}
+.navlinks{display:flex;gap:6px;margin-left:4px}
+.navlinks a{
+  color:var(--muted);
+  font-size:13.5px;font-weight:600;
+  padding:6px 11px;border-radius:7px;
+}
+.navlinks a:hover{color:var(--ink);background:#2e2e40}
+.topright{margin-left:auto;display:flex;align-items:center;gap:9px}
+/* #authArea is a flex ITEM of .topright, but its own children (the signed-in
+   block and the Log out button) are siblings. Left as a block they stacked
+   vertically and the Log out button dropped onto its own line under the
+   username. It has to be a flex row itself. */
+#authArea{display:flex;align-items:center;gap:10px}
+.iconbtn{
+  width:32px;height:32px;border-radius:7px;
+  background:#2e2e40;border:1px solid var(--line);
+  color:var(--muted);cursor:pointer;font-size:15px;
+  display:grid;place-items:center;
+}
+.pill{
+  border-radius:8px;padding:7px 14px;
+  font-size:13.5px;font-weight:600;cursor:pointer;
+}
+.pill.ghost{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.pill.solid{background:var(--accent);border:1px solid var(--accent);color:var(--on-accent)}
+.pill.solid:hover{background:var(--accent-hot);border-color:var(--accent-hot);color:var(--on-accent)}
+
+/* ----------------------------------------------------------- notice bar */
+.notice{
+  background:var(--notice);
+  padding:11px 20px;
+  display:flex;align-items:center;gap:12px;
+  font-size:13.5px;
+}
+.notice .gift{
+  width:26px;height:26px;flex:0 0 26px;border-radius:6px;
+  background:rgba(255,255,255,.16);
+  display:grid;place-items:center;font-size:14px;
+}
+.notice .txt{flex:1;max-width:900px;margin:0 auto;width:100%}
+.notice .x{
+  background:transparent;border:0;color:#fff;cursor:pointer;
+  font-size:17px;line-height:1;padding:4px 8px;opacity:.85;
+}
+
+/* ------------------------------------------------------------------ hero */
+.hero{
+  background:var(--bg2);
+  border-bottom:1px solid var(--line);
+  padding:26px 20px 22px;
+}
+.herowrap{max-width:980px;margin:0 auto}
+.herorow{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.heroCard{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+  display:block;
+}
+.heroArt{
+  height:150px;
+  display:grid;place-items:center;
+  text-align:center;
+  padding:12px;
+}
+.heroArt .big{font-size:38px;font-weight:800;letter-spacing:.02em;line-height:1}
+.heroArt .lbl{
+  display:block;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.92;margin-top:6px;font-weight:600;
+}
+.heroCap{
+  padding:11px 13px;font-size:13.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  color:var(--ink);
+}
+.heroCap .go{color:var(--accent);font-size:12px}
+
+/* ----------------------------------------------------------------- pills */
+.pills{display:flex;gap:9px;justify-content:center;padding:16px 20px 4px}
+.fpill{
+  background:transparent;
+  border:1px solid var(--accent);
+  color:var(--accent);
+  border-radius:999px;
+  padding:6px 16px;
+  font-size:13px;font-weight:600;
+  cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+}
+.fpill.on{background:var(--accent);color:var(--on-accent)}
+
+/* --------------------------------------------------------------- controls */
+.controls{
+  max-width:980px;margin:0 auto;
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  padding:14px 20px 4px;
+}
+input[type=search],select{
+  background:#21212e;
+  border:1px solid var(--line2);
+  color:var(--ink);
+  padding:8px 12px;border-radius:8px;font-size:14px;
+}
+input[type=search]{min-width:230px}
+.toggle{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;cursor:pointer}
+.toggle input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
+.statline{
+  max-width:980px;margin:0 auto;padding:0 20px 4px;
+  color:var(--dim);font-size:12.5px;
+}
+.statline b{color:var(--muted);font-weight:600}
+
+/* ------------------------------------------------------------------ body */
+.cols{
+  max-width:980px;margin:0 auto;
+  display:grid;grid-template-columns:212px 1fr;
+  gap:22px;
+  padding:18px 20px 60px;
+  align-items:start;
+}
+.railhead,.feedhead{font-size:15.5px;font-weight:700;margin:0 0 11px}
+
+.rail{display:flex;flex-direction:column;gap:12px}
+.roomCard{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:9px;overflow:hidden;
+}
+.roomArt{
+  aspect-ratio:4/3;
+  display:grid;place-items:center;
+  color:var(--dim);font-size:12px;text-align:center;padding:8px;
+  background:#21212e;
+}
+.roomArt img{width:100%;height:100%;object-fit:cover;display:block}
+.roomMeta{padding:8px 10px}
+.roomName{
+  font-size:13px;font-weight:600;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.roomSub{color:var(--dim);font-size:11.5px;margin-top:2px}
+
+.feed{display:flex;flex-direction:column;gap:18px}
+.post{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:10px;overflow:hidden;
+}
+.postHead{
+  display:flex;align-items:center;gap:9px;
+  padding:10px 12px;
+}
+.avatar{
+  width:30px;height:30px;border-radius:6px;flex:0 0 30px;
+  background:var(--ember);
+  display:grid;place-items:center;
+  font-size:12px;font-weight:700;color:var(--on-accent);
+  text-transform:uppercase;
+}
+.who{font-size:13.5px;font-weight:700;line-height:1.25}
+.atwho{font-size:11.5px;color:var(--dim)}
+.share{
+  margin-left:auto;background:transparent;border:0;
+  color:var(--muted);cursor:pointer;font-size:15px;padding:4px 6px;
+}
+.postImg{background:#101018;display:block;width:100%}
+.postFoot{
+  padding:10px 12px;
+  display:flex;align-items:center;gap:16px;
+  font-size:12.5px;color:var(--muted);
+}
+.postFoot .cheer{color:var(--ink);font-weight:600}
+.postFoot .comments{color:var(--dim)}
+.missing{
+  background:var(--panel);
+  border:1px dashed var(--line2);
+  border-radius:8px;
+  color:var(--dim);
+  font-size:12.5px;
+  padding:10px 12px;margin:0 20px 16px;
+}
+.empty{color:var(--dim);padding:40px 0;text-align:center;font-size:14px}
+
+/* ------------------------------------------------------------- login modal */
+.scrim{
+  position:fixed;inset:0;background:rgba(0,0,0,.66);
+  display:none;place-items:center;z-index:50;
+}
+.scrim.open{display:grid}
+.modal{
+  width:340px;max-width:92vw;
+  background:var(--panel);
+  border:1px solid var(--line2);
+  border-radius:10px;
+  padding:22px;
+}
+.modal h3{margin:0 0 4px;font-size:17px}
+.modal p.hint{color:var(--dim);font-size:12.5px;margin:0 0 16px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.field input{
+  width:100%;
+  background:#15151f;
+  border:1px solid var(--line2);
+  color:var(--ink);
+  padding:9px 11px;border-radius:7px;font-size:14px;
+}
+.field input:focus{outline:none;border-color:var(--accent)}
+.err{
+  display:none;
+  background:rgba(255,62,241,.12);
+  border:1px solid rgba(255,62,241,.45);
+  color:#ff9ae4;
+  border-radius:7px;padding:8px 10px;font-size:12.5px;margin-bottom:12px;
+}
+.err.show{display:block}
+.modal .row{display:flex;gap:9px;margin-top:16px}
+.modal .row .pill{flex:1;text-align:center}
+
+/* who is logged in */
+.whoami{display:flex;align-items:center;gap:9px}
+.whoami .avatar{width:28px;height:28px;flex:0 0 28px;font-size:12px}
+.whoami .nm{font-size:13.5px;font-weight:700;line-height:1.1}
+.whoami .rl{font-size:11px;color:var(--dim)}
+
+/* ---------------------------------------------------------- comment drawer */
+.cbox{border-top:1px solid var(--line);padding:11px 12px;display:none}
+.cbox.open{display:block}
+.cbox .cempty{color:var(--dim);font-size:12.5px}
+.crow{display:flex;gap:9px;margin-bottom:10px}
+.crow .avatar{width:24px;height:24px;flex:0 0 24px;font-size:11px;border-radius:5px}
+.crow .cb{font-size:13px;line-height:1.4}
+.crow .cn{font-weight:700;font-size:12.5px}
+.crow .ct{color:var(--dim);font-size:11px;margin-left:6px;font-weight:400}
+.crow .cx{color:var(--ink)}
+.cform{display:flex;gap:8px;margin-top:10px}
+.cform input{
+  flex:1;background:#15151f;border:1px solid var(--line2);
+  color:var(--ink);padding:8px 11px;border-radius:7px;font-size:13px;
+}
+.cform input:focus{outline:none;border-color:var(--accent)}
+.cform button{
+  background:var(--accent);border:0;color:var(--on-accent);font-weight:700;
+  padding:8px 14px;border-radius:7px;cursor:pointer;font-size:13px;
+}
+.cform button:disabled{opacity:.5;cursor:default}
+
+/* ---------------------------------------------------------- profile drawer */
+.whoami{cursor:pointer;border-radius:8px;padding:3px 6px;margin:-3px -6px;transition:background .12s}
+.whoami:hover{background:rgba(255,255,255,.06)}
+.pscrim{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;
+  transition:opacity .16s;z-index:60;
+}
+.pscrim.open{opacity:1;pointer-events:auto}
+.pdrawer{
+  position:fixed;top:0;right:0;height:100%;width:min(420px,94vw);
+  background:var(--panel);border-left:1px solid var(--line2);
+  transform:translateX(102%);transition:transform .18s ease;z-index:61;
+  display:flex;flex-direction:column;
+}
+.pdrawer.open{transform:translateX(0)}
+.phead{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--line);
+}
+.phead h3{margin:0;font-size:15px;letter-spacing:.02em}
+.phead .x{
+  background:none;border:0;color:var(--dim);font-size:24px;line-height:1;
+  cursor:pointer;padding:0 4px;
+}
+.phead .x:hover{color:var(--ink)}
+.pbody{padding:18px;overflow-y:auto;flex:1}
+.prow{margin-bottom:22px}
+.prow label{
+  display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:7px;font-weight:700;
+}
+.prow input[type=text],.prow textarea{
+  width:100%;background:#15151f;border:1px solid var(--line2);color:var(--ink);
+  padding:9px 11px;border-radius:7px;font-size:13.5px;font-family:inherit;
+}
+.prow textarea{resize:vertical;line-height:1.5}
+.prow input[type=text]:focus,.prow textarea:focus{outline:none;border-color:var(--accent)}
+.phint{color:var(--dim);font-size:11.5px;margin:6px 0 9px;line-height:1.45}
+.phint code{background:#15151f;padding:1px 5px;border-radius:4px;font-size:11px}
+.pchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.chip{
+  background:#15151f;border:1px solid var(--line2);color:var(--dim);
+  padding:6px 11px;border-radius:999px;font-size:12.5px;cursor:pointer;
+  font-family:inherit;transition:all .12s;
+}
+.chip:hover{border-color:var(--accent);color:var(--ink)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.prow .pill{margin-top:2px}
+.pmeta{color:var(--dim);font-size:11.5px;margin:8px 0 0;min-height:14px}
+.pmeta.bad{color:#ff8a8a}
+
+/* ------------------------------------------- loading screen editor */
+.pdrawer.wide{width:min(620px,96vw)}
+.lsrow{
+  background:#15151f;border:1px solid var(--line2);border-radius:9px;
+  padding:11px;margin-bottom:11px;
+}
+.lshead{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.lsrow input[type=text],.lsrow textarea,.lsrow .lstitle,.lsrow .lsimg,.lsroomlist{
+  width:100%;background:#0f0f17;border:1px solid var(--line2);color:var(--ink);
+  padding:8px 10px;border-radius:7px;font-size:13px;font-family:inherit;
+}
+.lsrow .lstitle{font-weight:700}
+.lsrow textarea{resize:vertical;line-height:1.5;margin-bottom:8px}
+.lsrow input:focus,.lsrow textarea:focus{outline:none;border-color:var(--accent)}
+.lshead .lstitle{flex:1}
+.lsdel{
+  background:none;border:1px solid var(--line2);color:var(--dim);
+  width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:18px;
+  line-height:1;flex:0 0 30px;
+}
+.lsdel:hover{border-color:#ff8a8a;color:#ff8a8a}
+.lsrooms{margin-top:8px}
+.lsrooms label{
+  display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:5px;font-weight:700;
+}
+.lsrooms .pmeta{display:inline;text-transform:none;letter-spacing:0;font-weight:400}
+.lsactions{display:flex;gap:9px;margin:14px 0 4px}
+
+footer{
+  border-top:1px solid var(--line);
+  padding:18px 20px;
+  text-align:center;
+  color:var(--dim);font-size:12.5px;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="mark">E</span> Ember</div>
+  <div class="navlinks">
+    <a href="#" onclick="show('photos');return false">Photos</a>
+    <a href="#" onclick="show('rooms');return false">Rooms</a>
+  </div>
+  <div class="topright">
+    <button class="iconbtn" title="Search" onclick="focusSearch()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+           stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+           stroke-linejoin="round" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5"></circle>
+        <line x1="15.4" y1="15.4" x2="21" y2="21"></line>
+      </svg>
+    </button>
+    <div id="authArea"></div>
+  </div>
+</div>
+
+<div class="notice" id="notice">
+  <span class="gift">&#127873;</span>
+  <p class="txt" id="noticeTxt"></p>
+  <button class="x" onclick="document.getElementById('notice').style.display='none'">&times;</button>
+</div>
+
+<!-- ================================================= profile drawer ==== -->
+<div class="pscrim" id="pscrim" onclick="closeProfile()"></div>
+<aside class="pdrawer" id="pdrawer" aria-label="Your profile">
+  <div class="phead">
+    <h3>Your profile</h3>
+    <button class="x" onclick="closeProfile()" title="Close">&times;</button>
+  </div>
+
+  <div class="pbody">
+    <div class="prow">
+      <label for="pEmoji">Emoji</label>
+      <input id="pEmoji" type="text" maxlength="16" placeholder="&#128054;" autocomplete="off">
+      <p class="phint">Up to 16 characters. Shown next to your name everywhere.</p>
+      <button class="pill solid" onclick="saveField('emoji')">Save emoji</button>
+    </div>
+
+    <div class="prow">
+      <label for="pBio">Bio</label>
+      <textarea id="pBio" rows="4" maxlength="500"
+                placeholder="Say something about yourself"
+                oninput="countBio()"></textarea>
+      <p class="phint"><span id="pBioCount">0</span>/500</p>
+      <button class="pill solid" onclick="saveField('bio')">Save bio</button>
+    </div>
+
+    <div class="prow">
+      <label>Pronouns</label>
+      <div class="pchips" id="pPronouns"></div>
+      <p class="phint">Sent as <code>personalPronouns</code> = <code id="pPronounsRaw">0</code></p>
+      <button class="pill solid" onclick="saveField('pronouns')">Save pronouns</button>
+    </div>
+
+    <div class="prow">
+      <label>Sexuality</label>
+      <div class="pchips" id="pFlags"></div>
+      <p class="phint">Sent as <code>identityFlags</code> = <code id="pFlagsRaw">0</code></p>
+      <button class="pill solid" onclick="saveField('flags')">Save sexuality</button>
+    </div>
+
+    <p class="pmeta" id="pNote"></p>
+  </div>
+</aside>
+
+<!-- ============================================ loading screen editor ==== -->
+<div class="pscrim" id="lsscrim" onclick="closeLoadingScreens()"></div>
+<aside class="pdrawer wide" id="lsdrawer" aria-label="Loading screen messages">
+  <div class="phead">
+    <h3>Loading screen messages</h3>
+    <button class="x" onclick="closeLoadingScreens()" title="Close">&times;</button>
+  </div>
+
+  <div class="pbody">
+    <p class="phint">These are the tips shown while a room loads. The client reads
+      the whole list at once, so saving applies every change together.</p>
+
+    <div id="lsList"></div>
+
+    <div class="lsactions">
+      <button class="pill ghost" onclick="lsAdd()">Add message</button>
+      <button class="pill solid" onclick="lsSave()">Save all</button>
+    </div>
+
+    <p class="pmeta" id="lsNote"></p>
+  </div>
+</aside>
+
+<!-- ================================================== admin commands ==== -->
+<div class="pscrim" id="admscrim" onclick="closeAdmin()"></div>
+<aside class="pdrawer wide" id="admdrawer" aria-label="Owner commands">
+  <div class="phead">
+    <h3>Owner Commands (dubzy only)</h3>
+    <button class="x" onclick="closeAdmin()" title="Close">&times;</button>
+  </div>
+
+  <div class="pbody">
+    <div class="prow">
+      <label for="adGiftPlayer">Player ID</label>
+      <input id="adGiftPlayer" type="text" placeholder="e.g. 12345">
+      <label for="adGiftItem" style="margin-top:10px;display:block">Item Descriptor</label>
+      <input id="adGiftItem" type="text" placeholder="e.g. Shirt, Shoes, Hat">
+      <label for="adGiftQty" style="margin-top:10px;display:block">Quantity</label>
+      <input id="adGiftQty" type="text" placeholder="1" value="1">
+      <button class="pill solid" onclick="doGift()">Gift Items</button>
+      <p class="phint" id="adGiftNote"></p>
+    </div>
+
+    <div class="prow" style="margin-top:16px;border-top:1px solid var(--line2);padding-top:12px">
+      <label for="adClothingPlayer">Player ID</label>
+      <input id="adClothingPlayer" type="text" placeholder="e.g. 12345">
+      <button class="pill solid" onclick="doGiveAllClothing()">Give All Clothing</button>
+      <p class="phint" id="adClothingNote"></p>
+    </div>
+
+    <div class="prow" style="margin-top:16px;border-top:1px solid var(--line2);padding-top:12px">
+      <label for="adTokensPlayer">Player ID</label>
+      <input id="adTokensPlayer" type="text" placeholder="e.g. 12345">
+      <label for="adTokensAmount" style="margin-top:10px;display:block">Amount</label>
+      <input id="adTokensAmount" type="text" placeholder="1000" value="1000">
+      <button class="pill solid" onclick="doGiftTokens()">Gift Tokens</button>
+      <p class="phint" id="adTokensNote"></p>
+    </div>
+
+    <div class="prow" style="margin-top:16px;border-top:1px solid var(--line2);padding-top:12px">
+      <label for="adAnnounce" style="display:block">Coach Announcement</label>
+      <textarea id="adAnnounce" rows="3" placeholder="e.g. Server restarting in 10 minutes"></textarea>
+      <button class="pill solid" onclick="doCoachAnnouncement()">Send Announcement</button>
+      <p class="phint" id="adAnnounceNote"></p>
+    </div>
+
+    <div class="prow" style="margin-top:16px;border-top:1px solid var(--line2);padding-top:12px">
+      <h3 style="margin:0 0 8px;font-size:14px">Community Board</h3>
+      <label for="cbMessage" style="display:block">Announcement Message ("Hi everyone!" banner)</label>
+      <input id="cbMessage" type="text" placeholder="e.g. Hi everyone!">
+      <label for="cbMoreInfo" style="margin-top:8px;display:block">More Info URL</label>
+      <input id="cbMoreInfo" type="text" placeholder="https://playEMBER.xyz/recnet">
+      <label for="cbFeaturedTitle" style="margin-top:8px;display:block">Featured Creator Title</label>
+      <input id="cbFeaturedTitle" type="text" placeholder="e.g. Featured Creator!">
+      <label for="cbFeaturedUrl" style="margin-top:8px;display:block">Featured Creator URL</label>
+      <input id="cbFeaturedUrl" type="text" placeholder="https://playEMBER.xyz/recnet/#user/27">
+      <label for="cbFeaturedId" style="margin-top:8px;display:block">Featured Creator Player ID</label>
+      <input id="cbFeaturedId" type="text" placeholder="e.g. 27">
+      <label for="cbRoomGroupName" style="margin-top:8px;display:block">Rooms Highlights Group Name</label>
+      <input id="cbRoomGroupName" type="text" placeholder="e.g. rooms Highlights">
+      <button class="pill solid" onclick="doCommunityBoard()">Save Community Board</button>
+      <p class="phint" id="cbNote"></p>
+    </div>
+  </div>
+</aside>
+
+<div class="hero">
+  <div class="herowrap">
+    <div class="herorow">
+      <a class="heroCard" href="#" onclick="show('photos');return false">
+        <div class="heroArt" style="background:linear-gradient(160deg,#ff3ef1,#c264ea)">
+          <div><span class="big" id="heroPhotos">0</span><span class="lbl">Photos</span></div>
+        </div>
+        <div class="heroCap"><span>View the gallery</span><span class="go">&#8250;</span></div>
+      </a>
+      <a class="heroCard" href="#" onclick="show('rooms');return false">
+        <div class="heroArt" style="background:linear-gradient(160deg,#c264ea,#7793e3)">
+          <div><span class="big" id="heroRooms">0</span><span class="lbl">Rooms</span></div>
+        </div>
+        <div class="heroCap"><span>Browse every room</span><span class="go">&#8250;</span></div>
+      </a>
+      <a class="heroCard" href="#" onclick="show('creators');return false">
+        <div class="heroArt" style="background:linear-gradient(160deg,#7793e3,#09dbdb)">
+          <div><span class="big" id="heroCreators">0</span><span class="lbl">Accounts</span></div>
+        </div>
+        <div class="heroCap"><span>See who made them</span><span class="go">&#8250;</span></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="pills">
+  <button class="fpill on" id="pill-photos" onclick="show('photos')">&#9679; Photos</button>
+  <button class="fpill" id="pill-rooms" onclick="show('rooms')">&#9679; Rooms</button>
+  <button class="fpill" id="pill-creators" onclick="show('creators')">&#9679; Creators</button>
+  <button class="fpill" id="pill-admin" onclick="show('admin')" style="display:none">&#9881; Admin</button>
+</div>
+
+<div class="controls">
+  <input type="search" id="q" placeholder="Search&hellip;" oninput="loadPhotos()">
+  <select id="creator" onchange="loadPhotos()"><option value="">All creators</option></select>
+  <select id="sort" onchange="loadPhotos()">
+    <option value="new">Newest first</option>
+    <option value="old">Oldest first</option>
+  </select>
+  <label class="toggle"><input type="checkbox" id="onlyfiles" onchange="loadPhotos()"> Only photos with image files</label>
+  <span class="statline" id="pagelabel"></span>
+</div>
+
+<div class="cols">
+  <section>
+    <h2 class="railhead">Featured Rooms</h2>
+    <div class="rail" id="rail"></div>
+  </section>
+  <section>
+    <h2 class="feedhead" id="feedhead">Take A Look At What's Happening Right Now In Ember</h2>
+    <div class="feed" id="feed"></div>
+  </section>
+</div>
+
+<footer>Ember &mdash; served by the Ember API. Photos and rooms read live from the server database.</footer>
+
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeLogin()">
+  <div class="modal">
+    <h3>Log in to Ember</h3>
+    <p class="hint">Use your Rec Room account on this server.</p>
+    <div class="err" id="loginErr"></div>
+    <div class="field">
+      <label for="lu">Username</label>
+      <input id="lu" autocomplete="username" autocapitalize="none" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="lp">Password</label>
+      <input id="lp" type="password" autocomplete="current-password">
+    </div>
+    <div class="row">
+      <button class="pill ghost" onclick="closeLogin()">Cancel</button>
+      <button class="pill solid" id="loginBtn" onclick="doLogin()">Log in</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var cur = 1, total = 0, pageSize = 24, tab = 'photos';
+
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function show(which){
+  tab = which;
+  cur = 1;
+  ['photos','rooms','creators','admin'].forEach(function(k){
+    document.getElementById('pill-' + k).className = 'fpill' + (k === which ? ' on' : '');
+  });
+
+  document.getElementById('feedhead').textContent =
+    which === 'rooms' ? 'Rooms On This Server'
+    : which === 'creators' ? 'Accounts On This Server'
+    : which === 'admin' ? 'Owner Commands'
+    : "Take A Look At What's Happening Right Now In Ember";
+
+  document.querySelector('.controls').style.display = which === 'photos' ? '' : 'none';
+
+  if(which === 'photos') loadPhotos();
+  else if(which === 'rooms') loadRooms();
+  else if(which === 'creators') loadCreatorsList();
+  else if(which === 'admin') {
+    document.getElementById('feed').innerHTML = '';
+    openAdmin();
+  }
+}
+
+/* Guard against a server/page field-name mismatch. This page originally read
+   p.imageAvailable while the server emitted "ImageAvailable", so every value
+   came through undefined, no <img> tags were ever created and every card read
+   "by @undefined". Failing loudly beats a plausible page that is quietly empty. */
+function fieldMismatch(p){
+  return p && p.imageAvailable === undefined && p.ImageAvailable === undefined;
+}
+
+function loadSummary(){
+  fetch('/site/public/summary').then(r => r.json()).then(function(s){
+    document.getElementById('heroPhotos').textContent   = s.photos;
+    document.getElementById('heroRooms').textContent    = s.rooms;
+    document.getElementById('heroCreators').textContent = s.creators;
+
+    document.getElementById('noticeTxt').innerHTML = s.photosMissing > 0
+      ? 'This server hosts <b>' + s.photos + '</b> photo records, but <b>' + s.photosMissing +
+        '</b> of them have no image file &mdash; the metadata shipped without the pixels. ' +
+        'Those show a placeholder. Photos taken in-game save normally.'
+      : 'Ember is up with <b>' + s.rooms + '</b> rooms, <b>' + s.creators +
+        '</b> accounts and <b>' + s.photos + '</b> photos, all with image files. ' +
+        'No account needed to browse.';
+  }).catch(function(){});
+}
+
+function loadCreators(){
+  fetch('/site/public/creators?limit=60').then(r => r.json()).then(function(list){
+    var sel = document.getElementById('creator');
+    list.forEach(function(c){
+      var o = document.createElement('option');
+      o.value = c.playerId;
+      o.textContent = c.username + ' (' + c.photoCount + ')';
+      sel.appendChild(o);
+    });
+  }).catch(function(){});
+}
+
+function loadPhotos(){
+  var q  = document.getElementById('q').value;
+  var cr = document.getElementById('creator').value;
+  var oldest = document.getElementById('sort').value === 'old';
+  var onlyFiles = document.getElementById('onlyfiles').checked;
+
+  var url = '/site/public/photos?page=' + cur + '&pageSize=' + pageSize +
+            '&oldestFirst=' + oldest;
+  if(onlyFiles) url += '&onlyWithImages=true';
+  if(q)  url += '&search=' + encodeURIComponent(q);
+  if(cr) url += '&creator=' + encodeURIComponent(cr);
+
+  fetch(url).then(r => r.json()).then(function(d){
+    total = d.total;
+    var pages = Math.max(1, Math.ceil(d.total / pageSize));
+    document.getElementById('pagelabel').innerHTML =
+      'Page ' + d.page + ' of ' + pages + ' &middot; <b>' + d.total + '</b> records &middot; ' +
+      '<b>' + d.withImages + '</b> with image files';
+
+    if(!d.photos.length){
+      document.getElementById('feed').innerHTML = '<div class="empty">No photos match that.</div>';
+      return;
+    }
+
+    if(fieldMismatch(d.photos[0])){
+      document.getElementById('feed').innerHTML =
+        '<div class="empty">API field names do not match this page &mdash; expected ' +
+        '<code>imageAvailable</code> / <code>playerId</code>, got <code>' +
+        esc(Object.keys(d.photos[0]).slice(0,4).join(', ')) + '</code>.</div>';
+      return;
+    }
+
+    document.getElementById('feed').innerHTML = d.photos.map(function(p){
+      var body = p.imageAvailable
+        ? '<img class="postImg" src="' + esc(p.url) + '" alt="">'
+        : '<div class="missing">This record has no image file on the server &mdash; the metadata is here, the pixels are not.</div>';
+
+      var who = p.creatorName || ('player ' + p.playerId);
+      var initial = esc(who.charAt(0));
+
+      var cbox = session && p.commentable
+        ? '<div class="cform">' +
+            '<input id="cin-' + esc(p.id) + '" maxlength="300" placeholder="Add a comment...">' +
+            '<button onclick="postComment(\'' + esc(p.id).replace(/'/g,"\\'") + '\')">Post</button>' +
+          '</div>'
+        : (session
+            ? '<div class="cempty">Comments are closed on this photo.</div>'
+            : '');
+
+      // The server only accepts comments on photos with SavedImageType 1 and
+      // Accessibility 1, so the affordance is only offered where it will work.
+      var commentLink = p.commentable
+        ? '<span class="comments" style="cursor:pointer" ' +
+          'onclick="toggleComments(\'' + esc(p.id).replace(/'/g,"\\'") + '\')">' +
+          (p.commentCount || 0) + ' comments</span>'
+        : '<span class="comments">' + (p.commentCount || 0) + ' comments</span>';
+
+      var foot = '<span class="cheer">' + p.cheerCount + ' cheers</span>' + commentLink +
+                 (session || p.commentCount ? '' :
+                   '<span class="comments">Log in to view comments for this photo</span>');
+
+      return '<article class="post">' +
+        '<div class="postHead">' +
+          '<div class="avatar">' + initial + '</div>' +
+          '<div><div class="who">' + esc(who) + '</div>' +
+          '<div class="atwho">' + esc(p.roomName ? '@' + p.roomName : '@ember') + '</div></div>' +
+          '<button class="share" title="Share">&#8599;</button>' +
+        '</div>' + body +
+        '<div class="postFoot">' + foot + '</div>' +
+        '<div class="cbox" id="cbox-' + esc(p.id) + '">' +
+          '<div class="clist"></div>' + cbox +
+        '</div>' +
+      '</article>';
+    }).join('');
+  }).catch(function(){
+    document.getElementById('feed').innerHTML = '<div class="empty">Could not load photos.</div>';
+  });
+}
+
+function loadRooms(){
+  fetch('/site/public/rooms?limit=40').then(r => r.json()).then(function(d){
+    if(!d.rooms.length){
+      document.getElementById('feed').innerHTML = '<div class="empty">No rooms.</div>';
+      return;
+    }
+
+    var withImg = d.rooms.filter(function(x){ return x.imageUrl; }).length;
+
+    document.getElementById('feed').innerHTML =
+      '<div class="missing">' + withImg + ' of ' + d.rooms.length +
+      ' newest rooms have a thumbnail stored on this server; the rest show a placeholder.</div>' +
+      d.rooms.map(function(x){
+        var art = x.imageUrl
+          ? '<div class="roomArt"><img src="' + esc(x.imageUrl) + '" alt=""></div>'
+          : '<div class="roomArt">no room image</div>';
+        return '<article class="post">' +
+          art +
+          '<div class="postHead">' +
+            '<div class="avatar">' + esc(x.name.charAt(0)) + '</div>' +
+            '<div><div class="who">' + esc(x.name) + '</div>' +
+            '<div class="atwho">by ' + esc(x.creator) + '</div></div>' +
+          '</div>' +
+          '<div class="postFoot">' +
+            '<span class="cheer">room ' + x.roomId + '</span>' +
+            '<span class="comments">max ' + x.maxPlayers + ' players</span>' +
+          '</div>' +
+        '</article>';
+      }).join('');
+  }).catch(function(){
+    document.getElementById('feed').innerHTML = '<div class="empty">Could not load rooms.</div>';
+  });
+}
+
+function loadCreatorsList(){
+  fetch('/site/public/creators?limit=60').then(r => r.json()).then(function(list){
+    if(!list.length){
+      document.getElementById('feed').innerHTML = '<div class="empty">No accounts.</div>';
+      return;
+    }
+    document.getElementById('feed').innerHTML = list.map(function(c){
+      return '<article class="post"><div class="postHead">' +
+        '<div class="avatar">' + esc(c.username.charAt(0)) + '</div>' +
+        '<div><div class="who">' + esc(c.username) + '</div>' +
+        '<div class="atwho">account ' + c.playerId + '</div></div>' +
+        '<button class="share" title="Share">&#8599;</button></div>' +
+        '<div class="postFoot">' +
+          '<span class="cheer">' + c.photoCount + ' photos</span>' +
+          '<span class="comments">' + c.photosWithImages + ' with image files</span>' +
+        '</div></article>';
+    }).join('');
+  }).catch(function(){
+    document.getElementById('feed').innerHTML = '<div class="empty">Could not load accounts.</div>';
+  });
+}
+
+/* The left rail mirrors whatever tab is open. */
+function loadRail(){
+  fetch('/site/public/rooms?limit=8').then(r => r.json()).then(function(d){
+    document.getElementById('rail').innerHTML = d.rooms.map(function(x){
+      var art = x.imageUrl
+        ? '<div class="roomArt"><img src="' + esc(x.imageUrl) + '" alt=""></div>'
+        : '<div class="roomArt">no room image</div>';
+      return '<div class="roomCard">' + art +
+        '<div class="roomMeta"><div class="roomName">' + esc(x.name) + '</div>' +
+        '<div class="roomSub">by ' + esc(x.creator) + '</div></div></div>';
+    }).join('');
+  }).catch(function(){
+    document.getElementById('rail').innerHTML = '<div class="empty">Could not load rooms.</div>';
+  });
+}
+
+/* The search box lives in the filter row, which is hidden unless the photos
+   tab is open. Focusing it from anywhere else did nothing visible, so switch
+   tab first and then select the existing text. */
+function focusSearch(){
+  if(tab !== 'photos') show('photos');
+  var q = document.getElementById('q');
+  q.focus();
+  q.select();
+}
+
+/* ============================================================== auth ======
+   The site logs in against the same accounts the game uses - there is no
+   second user store. POST /auth/connect/token is gated by CheckModGate,
+   which rejects any request missing X-EMBER-Build, and then requires either a
+   Steam id or platform=Oculus. A browser has no Steam id, so this sends
+   platform=Oculus, which is the server's own Quest-client path: no placeholder
+   id, and nothing to trip the Steam blacklist on. */
+var TOKEN_KEY = 'ember.token';
+var session = null;
+
+function readToken(){ try { return localStorage.getItem(TOKEN_KEY); } catch(e){ return null; } }
+function writeToken(t){
+  try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch(e){}
+}
+
+function openLogin(){
+  document.getElementById('loginErr').className = 'err';
+  document.getElementById('scrim').classList.add('open');
+  setTimeout(function(){ document.getElementById('lu').focus(); }, 0);
+}
+function closeLogin(){ document.getElementById('scrim').classList.remove('open'); }
+
+function loginError(msg){
+  var e = document.getElementById('loginErr');
+  e.textContent = msg;
+  e.className = 'err show';
+}
+
+function doLogin(){
+  var u = document.getElementById('lu').value.trim();
+  var p = document.getElementById('lp').value;
+  if(!u || !p){ loginError('Enter a username and password.'); return; }
+
+  var btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+
+  var body = new URLSearchParams();
+  body.set('grant_type', 'password');
+  body.set('username', u);
+  body.set('password', p);
+  body.set('client_id', 'Ember');
+  body.set('scope', '1');
+  body.set('platform', 'Oculus');
+
+  fetch('/auth/connect/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-EMBER-Build': '1.0.5'
+    },
+    body: body.toString()
+  })
+  .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+  .then(function(res){
+    if(!res.ok || !res.j.access_token){
+      var d = res.j || {};
+      loginError(d.error_description || d.error || 'Login failed.');
+      btn.disabled = false;
+      btn.textContent = 'Log in';
+      return;
+    }
+    writeToken(res.j.access_token);
+    document.getElementById('lp').value = '';
+    closeLogin();
+    loadSession();
+    if(tab === 'photos') loadPhotos();
+  })
+  .catch(function(){
+    loginError('Could not reach the server.');
+    btn.disabled = false;
+    btn.textContent = 'Log in';
+  });
+}
+
+function logout(){
+  writeToken(null);
+  session = null;
+  renderAuth();
+  if(tab === 'photos') loadPhotos();
+}
+
+function loadSession(){
+  var t = readToken();
+  if(!t){ session = null; renderAuth(); return; }
+
+  fetch('/acc/account/me', { headers: { 'Authorization': 'Bearer ' + t } })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(me){
+      if(!me){ writeToken(null); session = null; renderAuth(); return; }
+      // Keep the whole payload: the profile drawer edits personalPronouns,
+      // identityFlags and displayEmoji, which all live on this object.
+      session = { id: me.accountId, name: me.displayName || ('player ' + me.accountId), me: me };
+      // The site hides the loading-screen button for anyone but the owner so it
+      // does not sit there failing for everyone else. The real gate is server
+      // side - /site/admin/loadingscreen 401s for any other account regardless of
+      // what this flag says.
+      session.isOwner = String(me.username || '').toLowerCase() === 'dubzy';
+      renderAuth();
+      if(me.accountId) loadBio(t, me.accountId);
+      if(profileOpen()) fillProfile();
+    })
+    .catch(function(){ writeToken(null); session = null; renderAuth(); });
+}
+
+/* Bio is not part of /acc/account/me - it has its own endpoint. */
+function loadBio(t, accountId){
+  return fetch('/acc/account/' + accountId + '/bio', { headers: { 'Authorization': 'Bearer ' + t } })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ if(j && session) session.bio = j.bio || ''; })
+    .catch(function(){});
+}
+
+function renderAuth(){
+  var a = document.getElementById('authArea');
+  if(!session){
+    a.innerHTML = '<button class="pill ghost" onclick="openLogin()">Login</button>' +
+                  '<button class="pill solid" onclick="show(\'rooms\')">Download</button>';
+    return;
+  }
+  a.innerHTML =
+    '<div class="whoami" onclick="openProfile()" title="Edit your profile">' +
+      '<div class="avatar">' + esc(session.name.charAt(0)) + '</div>' +
+      '<div><div class="nm">' + esc(session.name) + '</div>' +
+      '<div class="rl">logged in &middot; edit profile</div></div>' +
+    '</div>' +
+    (session.isOwner
+      ? '<button class="pill ghost" onclick="openLoadingScreens()" ' +
+        'title="Edit the loading screen messages">Loading screens</button>'
+      : '') +
+    '<button class="pill ghost" onclick="logout()">Log out</button>';
+
+  // Show the Admin pill only for the owner account
+  document.getElementById('pill-admin').style.display =
+    session && session.isOwner ? '' : 'none';
+}
+
+/* =========================================================== profile ======
+   Edits the same fields the game client writes, through the endpoints it
+   already uses - there is no separate site-side profile store:
+
+     emoji      PUT /acc/account/me/emoji            (form: displayEmoji)
+     bio        PUT /acc/account/me/bio              (form: bio, <=500)
+     pronouns   PUT /acc/account/me/personalpronouns(form: personalPronouns)
+     sexuality  PUT /acc/account/me/identityflags    (form: identityFlags)
+
+   Pronouns and sexuality are bitmasks on the wire, not free text. The option
+   names and their order come from the client's own metadata - two consecutive
+   runs in global-metadata.dat:
+
+     SheHer HeHim TheyThem ZeHir ZeZir XeXem
+     LGBTQIA Transgender Bisexual Lesbian Pansexual Asexual Intersex
+     Genderqueer Nonbinary Aromantic
+
+   Six pronouns against the server's own six-bit check on personalPronouns
+   (`personalPronouns & ~0x3F`) is what says these are bit-per-option rather
+   than sequential values. The raw number is shown under each group so a wrong
+   guess is obvious in-game rather than silent. */
+var PRONOUNS = [
+  { label: 'she/her',   bit: 1 },
+  { label: 'he/him',    bit: 2 },
+  { label: 'they/them', bit: 4 },
+  { label: 'ze/hir',    bit: 8 },
+  { label: 'ze/zir',    bit: 16 },
+  { label: 'xe/xem',    bit: 32 }
+];
+
+var FLAGS = [
+  { label: 'LGBTQIA+',    bit: 1 },
+  { label: 'Transgender', bit: 2 },
+  { label: 'Bisexual',    bit: 4 },
+  { label: 'Lesbian',     bit: 8 },
+  { label: 'Pansexual',   bit: 16 },
+  { label: 'Asexual',     bit: 32 },
+  { label: 'Intersex',    bit: 64 },
+  { label: 'Genderqueer', bit: 128 },
+  { label: 'Nonbinary',   bit: 256 },
+  { label: 'Aromantic',   bit: 512 }
+];
+
+function profileOpen(){
+  var d = document.getElementById('pdrawer');
+  return d && d.classList.contains('open');
+}
+
+function openProfile(){
+  if(!session) return;
+  fillProfile();
+  document.getElementById('pscrim').classList.add('open');
+  document.getElementById('pdrawer').classList.add('open');
+  setTimeout(function(){
+    var e = document.getElementById('pEmoji');
+    if(e) e.focus();
+  }, 0);
+}
+
+function closeProfile(){
+  document.getElementById('pscrim').classList.remove('open');
+  document.getElementById('pdrawer').classList.remove('open');
+}
+
+function chipMarkup(containerId, options, value){
+  var html = '';
+  for(var i = 0; i < options.length; i++){
+    var on = (value & options[i].bit) !== 0;
+    html += '<button type="button" class="chip' + (on ? ' on' : '') + '"' +
+            ' data-cid="' + containerId + '" data-bit="' + options[i].bit + '"' +
+            ' onclick="toggleChip(this)">' + esc(options[i].label) + '</button>';
+  }
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function toggleChip(el){
+  el.classList.toggle('on');
+  var v = chipValue(el.getAttribute('data-cid'),
+                    el.getAttribute('data-cid') === 'pPronouns' ? PRONOUNS : FLAGS);
+  var raw = document.getElementById(el.getAttribute('data-cid') === 'pPronouns'
+                                    ? 'pPronounsRaw' : 'pFlagsRaw');
+  if(raw) raw.textContent = String(v);
+}
+
+function chipValue(containerId, options){
+  var v = 0;
+  var nodes = document.querySelectorAll('#' + containerId + ' .chip.on');
+  for(var i = 0; i < nodes.length; i++){
+    v |= parseInt(nodes[i].getAttribute('data-bit'), 10);
+  }
+  return v;
+}
+
+function fillProfile(){
+  var me = (session && session.me) || {};
+  var emoji = document.getElementById('pEmoji');
+  if(emoji) emoji.value = me.displayEmoji || '';
+
+  var bio = document.getElementById('pBio');
+  if(bio){
+    bio.value = (session && session.bio) || '';
+    countBio();
+  }
+
+  var pr = me.personalPronouns || 0;
+  var fl = me.identityFlags || 0;
+  chipMarkup('pPronouns', PRONOUNS, pr);
+  chipMarkup('pFlags', FLAGS, fl);
+  var praw = document.getElementById('pPronounsRaw');
+  if(praw) praw.textContent = String(pr);
+  var fraw = document.getElementById('pFlagsRaw');
+  if(fraw) fraw.textContent = String(fl);
+}
+
+function countBio(){
+  var b = document.getElementById('pBio');
+  var c = document.getElementById('pBioCount');
+  if(b && c) c.textContent = String(b.value.length);
+}
+
+function profileNote(msg, bad){
+  var n = document.getElementById('pNote');
+  if(!n) return;
+  n.textContent = msg;
+  n.className = 'pmeta' + (bad ? ' bad' : '');
+}
+
+function saveField(which){
+  var t = readToken();
+  if(!t){ profileNote('Not logged in.', true); return; }
+
+  var path, key, value, label;
+
+  if(which === 'emoji'){
+    path = '/acc/account/me/emoji'; key = 'displayEmoji'; label = 'Emoji';
+    value = document.getElementById('pEmoji').value.trim();
+    // The endpoint 400s on an empty value, so say so rather than letting it
+    // fail with a bare "invalid_displayEmoji".
+    if(!value){ profileNote('Emoji cannot be blank.', true); return; }
+  } else if(which === 'bio'){
+    path = '/acc/account/me/bio'; key = 'bio'; label = 'Bio';
+    value = document.getElementById('pBio').value;
+  } else if(which === 'pronouns'){
+    path = '/acc/account/me/personalpronouns'; key = 'personalPronouns';
+    label = 'Pronouns';
+    value = String(chipValue('pPronouns', PRONOUNS));
+  } else {
+    path = '/acc/account/me/identityflags'; key = 'identityFlags';
+    label = 'Sexuality';
+    value = String(chipValue('pFlags', FLAGS));
+  }
+
+  var body = new URLSearchParams();
+  body.set(key, value);
+
+  profileNote(label + ': saving...');
+
+  fetch(path, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'Bearer ' + t,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: body.toString()
+  })
+  .then(function(r){
+    return r.text().then(function(txt){ return { ok: r.ok, txt: txt }; });
+  })
+  .then(function(res){
+    if(!res.ok){
+      profileNote(label + ' failed: ' + res.txt.slice(0, 140), true);
+      return;
+    }
+    profileNote(label + ' saved.');
+    loadSession();
+  })
+  .catch(function(){ profileNote(label + ': could not reach the server.', true); });
+}
+
+/* ===================================================== loading screens =====
+   The client fetches /cdn/config/LoadingScreenTipData, which serves
+   Data/loadingscreen.json - a flat array of
+
+     { ImageName, Message, PlatformMask, RoomNames, Title }
+
+   This edits that array. Every save sends the whole list, so add and remove are
+   the same operation as editing, and there is no partial state for the client
+   to read half of. */
+var lsEntries = [];
+
+function openLoadingScreens(){
+  var t = readToken();
+  if(!t || !session || !session.isOwner) return;
+
+  var drawer = document.getElementById('lsdrawer');
+  drawer.classList.add('open');
+  document.getElementById('lsscrim').classList.add('open');
+
+  lsNote('Loading...');
+
+  fetch('/site/admin/loadingscreen', { headers: { 'Authorization': 'Bearer ' + t } })
+    .then(function(r){
+      if(r.status === 401) throw new Error('owner_only');
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(list){
+      lsEntries = Array.isArray(list) ? list : [];
+      renderLoadingScreens();
+      lsNote(lsEntries.length + ' message(s).');
+    })
+    .catch(function(e){
+      lsEntries = [];
+      renderLoadingScreens();
+      lsNote(e.message === 'owner_only'
+             ? 'Only the dubzy account can edit these.'
+             : 'Could not load: ' + e.message, true);
+    });
+}
+
+function closeLoadingScreens(){
+  document.getElementById('lsscrim').classList.remove('open');
+  document.getElementById('lsdrawer').classList.remove('open');
+}
+
+function lsNote(msg, bad){
+  var n = document.getElementById('lsNote');
+  if(!n) return;
+  n.textContent = msg;
+  n.className = 'pmeta' + (bad ? ' bad' : '');
+}
+
+function renderLoadingScreens(){
+  var host = document.getElementById('lsList');
+  if(!lsEntries.length){
+    host.innerHTML = '<p class="pmeta">No messages. Add one below.</p>';
+    return;
+  }
+
+  var html = '';
+  for(var i = 0; i < lsEntries.length; i++){
+    var e = lsEntries[i] || {};
+    html +=
+      '<div class="lsrow" data-i="' + i + '">' +
+        '<div class="lshead">' +
+          '<input class="lstitle" data-i="' + i + '" maxlength="120" ' +
+                 'placeholder="Title" value="' + esc(e.Title || '') + '">' +
+          '<button class="lsdel" data-i="' + i + '" title="Remove" ' +
+                  'onclick="lsRemove(' + i + ')">&times;</button>' +
+        '</div>' +
+        '<textarea class="lsmsg" data-i="' + i + '" rows="3" maxlength="600" ' +
+                  'placeholder="Message">' + esc(e.Message || '') + '</textarea>' +
+        '<input class="lsimg" data-i="' + i + '" maxlength="400" ' +
+               'placeholder="Image name or URL" value="' + esc(e.ImageName || '') + '">' +
+        '<div class="lsrooms">' +
+          '<label>Rooms <span class="pmeta">(comma separated, blank = all)</span></label>' +
+          '<input class="lsroomlist" data-i="' + i + '" value="' +
+                 esc((e.RoomNames || []).join(', ')) + '">' +
+        '</div>' +
+      '</div>';
+  }
+  host.innerHTML = html;
+}
+
+function lsAdd(){
+  lsEntries.push({ ImageName: '', Message: '', PlatformMask: -1, RoomNames: [], Title: '' });
+  renderLoadingScreens();
+  var host = document.getElementById('lsList');
+  host.scrollTop = host.scrollHeight;
+}
+
+function lsRemove(i){
+  lsEntries.splice(i, 1);
+  renderLoadingScreens();
+}
+
+function lsSave(){
+  var t = readToken();
+  if(!t) return;
+
+  // Read the inputs back rather than tracking them on every keystroke - fewer
+  // moving parts, and a field the user never touched still round-trips.
+  var titles = document.querySelectorAll('#lsList .lstitle');
+  var msgs   = document.querySelectorAll('#lsList .lsmsg');
+  var imgs   = document.querySelectorAll('#lsList .lsimg');
+  var rooms  = document.querySelectorAll('#lsList .lsroomlist');
+
+  for(var i = 0; i < lsEntries.length; i++){
+    var e = lsEntries[i];
+    if(titles[i]) e.Title = titles[i].value;
+    if(msgs[i])   e.Message = msgs[i].value;
+    if(imgs[i])   e.ImageName = imgs[i].value;
+    if(rooms[i]){
+      e.RoomNames = rooms[i].value
+        .split(',')
+        .map(function(s){ return s.trim(); })
+        .filter(function(s){ return s.length > 0; });
+    }
+  }
+
+  lsNote('Saving...');
+
+  fetch('/site/admin/loadingscreen', {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'Bearer ' + t,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(lsEntries)
+  })
+  .then(function(r){
+    return r.text().then(function(txt){
+      return { ok: r.ok, status: r.status, txt: txt };
+    });
+  })
+  .then(function(res){
+    if(!res.ok){
+      lsNote('Save failed (HTTP ' + res.status + '): ' + res.txt.slice(0, 160), true);
+      return;
+    }
+    var j = {};
+    try { j = JSON.parse(res.txt); } catch(e){}
+    lsNote('Saved ' + (j.count != null ? j.count : lsEntries.length) +
+           ' message(s). Players see the new text on their next room load.');
+  })
+  .catch(function(){ lsNote('Could not reach the server.', true); });
+}
+
+/* ==================================================== owner commands ====== */
+function openAdmin(){
+  if(!session || !session.isOwner) return;
+  document.getElementById('admdrawer').classList.add('open');
+  document.getElementById('admscrim').classList.add('open');
+  loadCommunityBoard();
+}
+
+function closeAdmin(){
+  document.getElementById('admscrim').classList.remove('open');
+  document.getElementById('admdrawer').classList.remove('open');
+}
+
+function adminNote(id, msg, bad){
+  var n = document.getElementById(id);
+  if(!n) return;
+  n.textContent = msg;
+  n.className = 'pmeta' + (bad ? ' bad' : '');
+}
+
+function doGift(){
+  var t = readToken();
+  if(!t || !session || !session.isOwner){ adminNote('adGiftNote','Not logged in as owner.',true); return; }
+
+  var pid = document.getElementById('adGiftPlayer').value.trim();
+  var item = document.getElementById('adGiftItem').value.trim();
+  var qty = document.getElementById('adGiftQty').value.trim();
+  if(!pid || !item){ adminNote('adGiftNote','Player ID and item required.',true); return; }
+
+  fetch('/site/admin/gift', {
+    method:'POST',
+    headers: {'Authorization':'Bearer '+t,'Content-Type':'application/json'},
+    body: JSON.stringify({ PlayerId: parseInt(pid), ItemDescriptor: item, Quantity: parseInt(qty)||1 })
+  })
+  .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+  .then(function(res){
+    if(!res.ok){ adminNote('adGiftNote','Failed: '+(res.j.error||'unknown'),true); return; }
+    adminNote('adGiftNote','Gifted x'+res.j.quantity+' '+res.j.itemDescriptor+' to player '+res.j.playerId);
+  })
+  .catch(function(){ adminNote('adGiftNote','Could not reach the server.',true); });
+}
+
+function doGiveAllClothing(){
+  var t = readToken();
+  if(!t || !session || !session.isOwner){ adminNote('adClothingNote','Not logged in as owner.',true); return; }
+
+  var pid = document.getElementById('adClothingPlayer').value.trim();
+  if(!pid){ adminNote('adClothingNote','Player ID required.',true); return; }
+
+  fetch('/site/admin/giveallclothing', {
+    method:'POST',
+    headers: {'Authorization':'Bearer '+t,'Content-Type':'application/json'},
+    body: JSON.stringify(parseInt(pid))
+  })
+  .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+  .then(function(res){
+    if(!res.ok){ adminNote('adClothingNote','Failed: '+(res.j.error||'unknown'),true); return; }
+    adminNote('adClothingNote','All clothing given to player '+res.j.playerId);
+  })
+  .catch(function(){ adminNote('adClothingNote','Could not reach the server.',true); });
+}
+
+function doGiftTokens(){
+  var t = readToken();
+  if(!t || !session || !session.isOwner){ adminNote('adTokensNote','Not logged in as owner.',true); return; }
+
+  var pid = document.getElementById('adTokensPlayer').value.trim();
+  var amt = document.getElementById('adTokensAmount').value.trim();
+  if(!pid){ adminNote('adTokensNote','Player ID required.',true); return; }
+
+  fetch('/site/admin/gifttokens', {
+    method:'POST',
+    headers: {'Authorization':'Bearer '+t,'Content-Type':'application/json'},
+    body: JSON.stringify({ PlayerId: parseInt(pid), Amount: parseInt(amt)||1000 })
+  })
+  .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+  .then(function(res){
+    if(!res.ok){ adminNote('adTokensNote','Failed: '+(res.j.error||'unknown'),true); return; }
+    adminNote('adTokensNote','Gifted '+res.j.amount+' tokens to player '+res.j.playerId);
+  })
+  .catch(function(){ adminNote('adTokensNote','Could not reach the server.',true); });
+}
+
+function doCoachAnnouncement(){
+  var t = readToken();
+  if(!t || !session || !session.isOwner){ adminNote('adAnnounceNote','Not logged in as owner.',true); return; }
+
+  var msg = document.getElementById('adAnnounce').value.trim();
+  if(!msg){ adminNote('adAnnounceNote','Message required.',true); return; }
+
+  fetch('/site/admin/coachannouncements', {
+    method:'POST',
+    headers: {'Authorization':'Bearer '+t,'Content-Type':'application/json'},
+    body: JSON.stringify(msg)
+  })
+  .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+  .then(function(res){
+    if(!res.ok){ adminNote('adAnnounceNote','Failed: '+(res.j.error||'unknown'),true); return; }
+    adminNote('adAnnounceNote','Announcement sent to '+res.j.playerCount+' player(s)');
+  })
+  .catch(function(){ adminNote('adAnnounceNote','Could not reach the server.',true); });
+}
+
+/* ==================================================== community board ====== */
+function loadCommunityBoard(){
+  var t = readToken();
+  if(!t || !session || !session.isOwner) return;
+
+  fetch('/site/admin/community-board', { headers: { 'Authorization': 'Bearer ' + t } })
+    .then(function(r){
+      if(r.status === 401) throw new Error('owner_only');
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(board){
+      var fp = board.FeaturedPlayer || {};
+      var ca = board.CurrentAnnouncement || {};
+      var frg = board.FeaturedRoomGroup || {};
+
+      document.getElementById('cbFeaturedId').value    = fp.Id || '';
+      document.getElementById('cbFeaturedTitle').value = fp.TitleOverride || '';
+      document.getElementById('cbFeaturedUrl').value   = fp.UrlOverride || '';
+      document.getElementById('cbMessage').value       = ca.Message || '';
+      document.getElementById('cbMoreInfo').value      = ca.MoreInfoUrl || '';
+      document.getElementById('cbRoomGroupName').value = frg.Name || '';
+
+      cbNote('Community board loaded.');
+    })
+    .catch(function(e){
+      cbNote(e.message === 'owner_only'
+             ? 'Only the dubzy account can edit the community board.'
+             : 'Could not load community board: ' + e.message, true);
+    });
+}
+
+function cbNote(msg, bad){
+  var n = document.getElementById('cbNote');
+  if(!n) return;
+  n.textContent = msg;
+  n.className = 'pmeta' + (bad ? ' bad' : '');
+}
+
+function doCommunityBoard(){
+  var t = readToken();
+  if(!t || !session || !session.isOwner){ cbNote('Not logged in as owner.',true); return; }
+
+  var board = {
+    FeaturedPlayer: {
+      Id: parseInt(document.getElementById('cbFeaturedId').value) || 0,
+      TitleOverride: document.getElementById('cbFeaturedTitle').value.trim(),
+      UrlOverride: document.getElementById('cbFeaturedUrl').value.trim()
+    },
+    CurrentAnnouncement: {
+      Message: document.getElementById('cbMessage').value.trim(),
+      MoreInfoUrl: document.getElementById('cbMoreInfo').value.trim()
+    },
+    FeaturedRoomGroup: {
+      Name: document.getElementById('cbRoomGroupName').value.trim(),
+      FeaturedRooms: [],
+      Rooms: []
+    },
+    InstagramImages: [],
+    Videos: []
+  };
+
+  fetch('/site/admin/community-board', {
+    method:'PUT',
+    headers: {'Authorization':'Bearer '+t,'Content-Type':'application/json'},
+    body: JSON.stringify(board)
+  })
+  .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+  .then(function(res){
+    if(!res.ok){ cbNote('Failed: '+(res.j.error||'unknown'),true); return; }
+    cbNote('Community board saved. Players will see changes on next reload.');
+  })
+  .catch(function(){ cbNote('Could not reach the server.',true); });
+}
+
+/* ========================================================== comments ====== */
+var openCommentBox = {};
+
+function toggleComments(id){
+  var box = document.getElementById('cbox-' + id);
+  if(!box) return;
+
+  if(box.classList.contains('open')){
+    box.classList.remove('open');
+    return;
+  }
+
+  box.classList.add('open');
+  var body = box.querySelector('.clist');
+  body.innerHTML = '<div class="cempty">Loading...</div>';
+
+  fetch('/site/public/comments?path=' + encodeURIComponent(id))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.comments || !d.comments.length){
+        body.innerHTML = '<div class="cempty">No comments yet.</div>';
+        return;
+      }
+      body.innerHTML = d.comments.map(function(c){
+        var when = '';
+        try { when = new Date(c.createdAt).toLocaleString(); } catch(e){}
+        return '<div class="crow">' +
+          '<div class="avatar">' + esc((c.creatorName||'?').charAt(0)) + '</div>' +
+          '<div class="cb"><span class="cn">' + esc(c.creatorName || ('player ' + c.accountId)) +
+          '</span><span class="ct">' + esc(when) + '</span>' +
+          '<div class="cx">' + esc(c.text) + '</div></div></div>';
+      }).join('');
+    })
+    .catch(function(){ body.innerHTML = '<div class="cempty">Could not load comments.</div>'; });
+}
+
+function postComment(id){
+  var input = document.getElementById('cin-' + id);
+  var text = input.value.trim();
+  if(!text || !session) return;
+
+  var t = readToken();
+  fetch('/recnet/api/photos/comments', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + t
+    },
+    body: JSON.stringify({ path: id, text: text })
+  })
+  .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }); })
+  .then(function(res){
+    if(!res.ok){
+      var d = res.j || {};
+      alert(d.error || 'Could not post that comment.');
+      return;
+    }
+    input.value = '';
+    var box = document.getElementById('cbox-' + id);
+    box.classList.remove('open');
+    toggleComments(id);
+  });
+}
+
+loadSummary();
+loadCreators();
+loadPhotos();
+loadRail();
+loadSession();
+</script>
+</body>
+</html>

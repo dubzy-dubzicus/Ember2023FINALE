@@ -1,0 +1,10 @@
+[
+  "Name",
+  "Description",
+  "Price",
+  "BaseAvatarItemId",
+  "BaseAvatarItemColor",
+  "Accessibility",
+  "CustomAvatarItemId:guid",
+  "ThumbnailImage"
+]

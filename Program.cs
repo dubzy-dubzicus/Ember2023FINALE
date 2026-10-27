@@ -6,6 +6,8 @@ using Ember2023;
 using Ember2023.Classes;
 using Ember2023.Classes.DBs;
 using Ember2023.Classes.DBs.DBClasses;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
 
 namespace Ember2023
 {
@@ -62,6 +64,14 @@ namespace Ember2023
             app.UseAuthorization();
 
             app.MapControllers();
+            
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Program.dataDir, "CDN", "room")),
+                RequestPath = "/cdn/room",
+                ServeUnknownFileTypes = true,
+                DefaultContentType = "application/octet-stream"
+            });
             
             // RoomDB.ImportRooms(Path.Combine(dataDir, "Imports", "ImportRooms.json")).Wait();
                         
