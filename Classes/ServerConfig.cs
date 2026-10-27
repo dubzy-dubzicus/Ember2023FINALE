@@ -10,7 +10,7 @@ namespace Ember2023.Classes
     public class ServerConfig
     {
         public static object Bracket => new List<object>(); 
-        public static string BaseURL = "https://logan2021.obfacus.com"; // replace with your url
+        public static string BaseURL = "http://100.126.252.79:2059"; // replace with your url
         public static int GameVersion = 20230406;
     }
 }
