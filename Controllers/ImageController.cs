@@ -4,6 +4,8 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Ember2023.Controllers
 {
@@ -11,6 +13,7 @@ namespace Ember2023.Controllers
     public class ImageController : ControllerBase
     {
         private const int MaxServedDimension = 2048;
+        private static readonly HttpClient SharedHttpClient = new();
 
         [Route("/imageserver/{*img_path}")]
         [Route("/imageserver-v2/{*img_path}")]
@@ -55,63 +58,88 @@ namespace Ember2023.Controllers
                 }
             }
 
+            byte[] finalBytes = null;
+            string mimeType = "image/png";
+
             if (foundLocalPath != null)
             {
                 try
                 {
                     var imageBytes = await System.IO.File.ReadAllBytesAsync(foundLocalPath);
-                    imageBytes = await ProcessImageAsync(imageBytes, cropSquare, width, height);
-                    return File(imageBytes, GetMimeType(img_path));
+                    finalBytes = await ProcessImageAsync(imageBytes, cropSquare, width, height);
+                    mimeType = GetMimeType(img_path);
                 }
                 catch
                 {
-                    var fallbackBytes = await System.IO.File.ReadAllBytesAsync(foundLocalPath);
-                    return File(fallbackBytes, GetMimeType(img_path));
+                    finalBytes = await System.IO.File.ReadAllBytesAsync(foundLocalPath);
+                    mimeType = GetMimeType(img_path);
                 }
             }
 
             // Try LoadingScreenImageService for RemoteLoadingScreens URLs
-            try
+            if (finalBytes == null)
             {
-                var localImagePath = await Classes.LoadingScreenImageService.GetLocalImageAsync(img_path, HttpContext.RequestAborted);
-                if (localImagePath != null && System.IO.File.Exists(localImagePath))
+                try
                 {
-                    var imageBytes = await System.IO.File.ReadAllBytesAsync(localImagePath);
-                    imageBytes = await ProcessImageAsync(imageBytes, cropSquare, width, height);
-                    return File(imageBytes, GetMimeType(localImagePath));
+                    var localImagePath = await Classes.LoadingScreenImageService.GetLocalImageAsync(img_path, HttpContext.RequestAborted);
+                    if (localImagePath != null && System.IO.File.Exists(localImagePath))
+                    {
+                        var imageBytes = await System.IO.File.ReadAllBytesAsync(localImagePath);
+                        finalBytes = await ProcessImageAsync(imageBytes, cropSquare, width, height);
+                        mimeType = GetMimeType(localImagePath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[LoadingScreenImageService] Failed for {img_path}: {ex.Message}");
                 }
             }
-            catch (Exception ex)
+
+            if (finalBytes == null)
             {
-                Console.WriteLine($"[LoadingScreenImageService] Failed for {img_path}: {ex.Message}");
-            }
-
-            string recNetLocalPath = Path.Combine(baseImagesPath, "RecNet", img_path);
-
-            try
-            {
-                using HttpClient client = new();
-                byte[] data = await client.GetByteArrayAsync($"https://img.rec.net/{img_path}");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(recNetLocalPath)!);
-                await System.IO.File.WriteAllBytesAsync(recNetLocalPath, data);
+                string recNetLocalPath = Path.Combine(baseImagesPath, "RecNet", img_path);
 
                 try
                 {
-                    var processed = await ProcessImageAsync(data, cropSquare, width, height);
-                    return File(processed, GetMimeType(img_path));
+                byte[] data = await SharedHttpClient.GetByteArrayAsync($"https://img.rec.net/{img_path}");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(recNetLocalPath)!);
+                    await System.IO.File.WriteAllBytesAsync(recNetLocalPath, data);
+
+                    try
+                    {
+                        finalBytes = await ProcessImageAsync(data, cropSquare, width, height);
+                        mimeType = GetMimeType(img_path);
+                    }
+                    catch
+                    {
+                        finalBytes = data;
+                        mimeType = GetMimeType(img_path);
+                    }
                 }
-                catch
+                catch (HttpRequestException ex)
                 {
-                    return File(data, GetMimeType(img_path));
+                    Console.WriteLine($"[rec_net fetch failed] {ex.Message}");
                 }
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"[rec_net fetch failed] {ex.Message}");
             }
 
-            return NotFound();
+            if (finalBytes == null)
+            {
+                return NotFound();
+            }
+
+            // Add Content-Signature header (RSA-SHA1)
+            try
+            {
+                var signature = Classes.ImageSigner.Shared.SignImage(finalBytes);
+                HttpContext.Response.Headers.Append("Content-Signature", Convert.ToBase64String(signature));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ImageSigner] Failed to sign {img_path}: {ex.Message}");
+            }
+
+            return File(finalBytes, mimeType);
         }
 
         private static string GetMimeType(string filePath)

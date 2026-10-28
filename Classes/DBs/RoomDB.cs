@@ -12,6 +12,7 @@ namespace Ember2023.Classes.DBs
     {
         public static LiteDatabase RoomDBFile = new LiteDatabase(Path.Combine(Program.dataDir, "DBs", "Rooms.db"));
         public static readonly ILiteCollection<Room> Rooms = RoomDBFile.GetCollection<Room>("Rooms");
+        private static readonly object WriteLock = new();
 
         public static async Task ImportRooms(string path)
         {
@@ -62,7 +63,6 @@ namespace Ember2023.Classes.DBs
                             sub.RoomId = newRoom.RoomId;
                         }
                     }
-
                     Rooms.Insert(newRoom);
 
                     if (log)
@@ -126,10 +126,24 @@ namespace Ember2023.Classes.DBs
             ).ToList();
         }
         
+        public static void MarkRROsAsCloneable()
+        {
+            var rros = Rooms.Find(r => r.IsRRO).ToList();
+            foreach (var room in rros)
+            {
+                if (!room.CloningAllowed)
+                {
+                    room.CloningAllowed = true;
+                    Rooms.Update(room);
+                }
+            }
+            Console.WriteLine($"[RoomDB] Marked {rros.Count} RRO rooms as cloneable/templates");
+        }
+
         public static (List<Room> Results, int Total) GetHotRooms(string tag, int skip, int take)
         {
-            var query = Rooms.Query().Where(r => !r.IsDorm);
             string t = tag?.ToLower();
+            var query = Rooms.Query().Where(r => !r.IsDorm);
             bool isRRO = (t == "rro" || t == "recroomoriginal");
 
             if (isRRO) 

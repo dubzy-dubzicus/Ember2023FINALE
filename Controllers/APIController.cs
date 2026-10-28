@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Ember2023.Classes;
 using Ember2023.Classes.DBs;
 using Ember2023.Classes.DBs.DBClasses;
+using PDBC = Ember2023.Classes.DBs.DBClasses.PlayerDBClasses;
 using Ember2023.Auth;
 using System.Text.Json;
 
@@ -120,7 +121,131 @@ namespace Ember2023.Controllers
             if (player == null)
             	return Unauthorized();
 
-            return Ok(player.Player.PlayerExtra.Avatar);
+            return Ok(new
+            {
+                outfitSelections = player.Player.PlayerExtra.Avatar.OutfitSelections,
+                faceFeatures = player.Player.PlayerExtra.Avatar.FaceFeatures,
+                skinColor = player.Player.PlayerExtra.Avatar.SkinColor,
+                hairColor = player.Player.PlayerExtra.Avatar.HairColor,
+                avatarItems = player.Player.PlayerExtra.AvatarItems,
+                savedAvatars = player.Player.PlayerExtra.SavedAvatars
+            });
+        }
+        
+        [HttpGet("/api/avatar/v2/items")]
+        public IActionResult GetMyAvatarItemsPlayer()
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null) 
+            	return Unauthorized();
+
+            var player = PlayerDB.Players.FindById((long)id);
+            if (player == null || player.Player == null)
+                return NotFound();
+
+            return Ok(new
+            {
+                Results = player.Player.PlayerExtra.AvatarItems.Select(i => new { id = i }).ToList(),
+                TotalResults = player.Player.PlayerExtra.AvatarItems.Count
+            });
+        }
+
+        [HttpPost("/api/avatar/v2/items")]
+        public IActionResult AddAvatarItem([FromBody] AvatarItemRequest request)
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null) 
+            	return Unauthorized();
+
+            var player = PlayerDB.Players.FindById((long)id);
+            if (player == null || player.Player == null)
+                return NotFound();
+
+            if (!player.Player.PlayerExtra.AvatarItems.Contains(request.ItemId))
+            {
+                player.Player.PlayerExtra.AvatarItems.Add(request.ItemId);
+                PlayerDB.Players.Update(player);
+            }
+
+            return Ok(new { success = true });
+        }
+
+        [HttpDelete("/api/avatar/v2/items/{itemId}")]
+        public IActionResult RemoveAvatarItem(string itemId)
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null) 
+            	return Unauthorized();
+
+            var player = PlayerDB.Players.FindById((long)id);
+            if (player == null || player.Player == null)
+                return NotFound();
+
+            player.Player.PlayerExtra.AvatarItems.Remove(itemId);
+            PlayerDB.Players.Update(player);
+
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("/api/avatar/v2/saved")]
+        public IActionResult GetSavedOutfits()
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null) 
+            	return Unauthorized();
+
+            var player = PlayerDB.Players.FindById((long)id);
+            if (player == null || player.Player == null)
+                return NotFound();
+
+            return Ok(player.Player.PlayerExtra.SavedAvatars);
+        }
+
+        [HttpPost("/api/avatar/v2/saved")]
+        public IActionResult SaveOutfit([FromBody] SavedOutfitRequest request)
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null) 
+            	return Unauthorized();
+
+            var player = PlayerDB.Players.FindById((long)id);
+            if (player == null || player.Player == null)
+                return NotFound();
+
+            var outfit = new PDBC.SavedOutfit
+            {
+                Slot = request.Slot,
+                PreviewImageName = request.PreviewImageName,
+                OutfitSelections = request.OutfitSelections,
+                FaceFeatures = request.FaceFeatures,
+                SkinColor = request.SkinColor,
+                HairColor = request.HairColor
+            };
+
+            var existing = player.Player.PlayerExtra.SavedAvatars.FirstOrDefault(s => s.Slot == request.Slot);
+            if (existing != null)
+            {
+                player.Player.PlayerExtra.SavedAvatars.Remove(existing);
+            }
+            player.Player.PlayerExtra.SavedAvatars.Add(outfit);
+            PlayerDB.Players.Update(player);
+
+            return Ok(new { success = true });
+        }
+
+        public class AvatarItemRequest
+        {
+            public string ItemId { get; set; } = "";
+        }
+
+        public class SavedOutfitRequest
+        {
+            public int Slot { get; set; }
+            public string? PreviewImageName { get; set; }
+            public string? OutfitSelections { get; set; }
+            public string? FaceFeatures { get; set; }
+            public string? SkinColor { get; set; }
+            public string? HairColor { get; set; }
         }
         
         [HttpPost("/api/avatar/v2/set")]
@@ -283,6 +408,17 @@ namespace Ember2023.Controllers
             return Ok(ServerConfig.Bracket);
         }
         
+        [HttpGet("/api/loadingscreen/v1/config")]
+        public IActionResult GetLoadingScreenConfig()
+        {
+            var path = Path.Combine(Program.dataDir, "Imports", "loadingscreen.rewritten.json");
+            if (System.IO.File.Exists(path))
+            {
+                return Content(System.IO.File.ReadAllText(path), "application/json");
+            }
+            return NotFound();
+        }
+        
         [HttpGet("/api/playerevents/v1/all")]
         public IActionResult GetAllPlayerEvents()
         {
@@ -329,6 +465,41 @@ namespace Ember2023.Controllers
             {
                 IsPure = true
             });
+        }
+
+        [HttpPut("/api/players/v1/{accountId}/bio")]
+        public IActionResult SetBio(long accountId, [FromBody] BioRequest request)
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null)
+                return Unauthorized();
+
+            if (id != accountId)
+                return Forbid();
+
+            var player = PlayerDB.Players.FindById(accountId);
+            if (player == null || player.Player == null)
+                return NotFound();
+
+            player.Player.Bio = request.Bio ?? "";
+            PlayerDB.Players.Update(player);
+
+            return NoContent();
+        }
+
+        [HttpGet("/api/players/v1/{accountId}/bio")]
+        public IActionResult GetBio(long accountId)
+        {
+            var player = PlayerDB.Players.FindById(accountId);
+            if (player == null || player.Player == null)
+                return NotFound();
+
+            return Ok(new { bio = player.Player.Bio ?? "" });
+        }
+
+        public class BioRequest
+        {
+            public string? Bio { get; set; }
         }
         
         public class SanitizeRequest

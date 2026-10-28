@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using LiteDB;
 using Ember2023.Classes;
 using Ember2023.Classes.DBs.DBClasses;
@@ -10,7 +11,8 @@ namespace Ember2023.Classes.DBs
     {
         public static LiteDatabase PlayerDBFile = new LiteDatabase(Path.Combine(Program.dataDir, "DBs", "Players.db"));
         public static readonly ILiteCollection<FullPlayer> Players = PlayerDBFile.GetCollection<FullPlayer>("Players");
-        
+        private static readonly object WriteLock = new();
+
         public static FullPlayer CreateAccount(Platforms platform, ulong platformId, bool isJunior)
         {
             string username = NameGen.GetRandomName();
@@ -48,12 +50,15 @@ namespace Ember2023.Classes.DBs
                 PlayerRoles = new List<PlayerRoles> { PlayerRoles.Developer },
                 AuthToken = Guid.NewGuid().ToString()
             };
-            
-            Players.Insert(newFullPlayer);
+
+            lock (WriteLock)
+            {
+                Players.Insert(newFullPlayer);
+            }
 
             return newFullPlayer;
         }
-        
+
         public static bool GetLogins(Platforms platform, ulong platformId, out List<CachedLogins> accounts)
         {
             var results = Players.Find(x => x.PlatformIds
@@ -73,7 +78,7 @@ namespace Ember2023.Classes.DBs
 
             return accounts.Count > 0;
         }
-        
+
         private static PlayerDTOBase MapToDTO(FullPlayer player, bool accountMe)
         {
             int platformFlags = player.PlatformIds?.Aggregate(0, (acc, pid) => acc | (int)pid.Platform) ?? 0;
@@ -102,7 +107,7 @@ namespace Ember2023.Classes.DBs
 
             return dto;
         }
-        
+
         public static List<PlayerDTOBase> GetAccountsBulk(List<long> playerIds)
         {
             try
@@ -119,26 +124,29 @@ namespace Ember2023.Classes.DBs
                 return new List<PlayerDTOBase>();
             }
         }
-        
+
         public static PlayerMeDTO? GetAccountMe(long accountId)
         {
             var player = Players.FindById(accountId);
             if (player == null)
                 return null;
-            
+
             return MapToDTO(player, true) as PlayerMeDTO;
         }
-        
+
         public static bool SetAvatar(long accountId, Avatar avatar)
         {
-            var player = Players.FindById(accountId);
-            if (player == null || player.Player == null) 
-                return false;
+            lock (WriteLock)
+            {
+                var player = Players.FindById(accountId);
+                if (player == null || player.Player == null)
+                    return false;
 
-            player.Player.PlayerExtra.Avatar = avatar;
-            return Players.Update(player);
+                player.Player.PlayerExtra.Avatar = avatar;
+                return Players.Update(player);
+                   }
         }
-        
+
         public static void SetPlayerSetting(string key, string value, long playerId)
         {
             if (string.IsNullOrWhiteSpace(key) || playerId <= 0)
@@ -147,25 +155,28 @@ namespace Ember2023.Classes.DBs
             if (key is "SplitTestAssignedSegments" or "Growth.LastEmailPromptTime")
                 return;
 
-            var player = Players.FindById(playerId);
-            if (player == null || player.Player == null) 
-                return;
-
-            var settings = player.Player.PlayerExtra.Settings;
-            var existingSetting = settings.FirstOrDefault(s => s.Key == key);
-
-            if (existingSetting != null)
+            lock (WriteLock)
             {
-                existingSetting.Value = value;
-            }
-            else
-            {
-                settings.Add(new Setting { Key = key, Value = value });
-            }
+                var player = Players.FindById(playerId);
+                if (player == null || player.Player == null)
+                    return;
 
-            Players.Update(player);
+                var settings = player.Player.PlayerExtra.Settings;
+                var existingSetting = settings.FirstOrDefault(s => s.Key == key);
+
+                if (existingSetting != null)
+                {
+                    existingSetting.Value = value;
+                }
+                else
+                {
+                    settings.Add(new Setting { Key = key, Value = value });
+                }
+
+                Players.Update(player);
+            }
         }
-        
+
         public static List<PlayerProgressionDTO> GetProgressionBulk(List<long> playerIds)
         {
             var players = Players.Find(x => playerIds.Contains(x.PlayerId)).ToList();
@@ -177,7 +188,7 @@ namespace Ember2023.Classes.DBs
                 XP = p.Player?.XP ?? 0
             }).ToList();
         }
-        
+
         public static List<Reputation> GetReputationBulk(List<long> playerIds)
         {
             var players = Players.Find(x => playerIds.Contains(x.PlayerId)).ToList();
@@ -201,7 +212,7 @@ namespace Ember2023.Classes.DBs
                 };
             }).ToList();
         }
-        
+
         public static Heartbeat GetPlayerHeartbeat(long playerId)
         {
             var player = Players.FindOne(x => x.PlayerId == playerId);
@@ -209,7 +220,7 @@ namespace Ember2023.Classes.DBs
             hb.playerId = playerId;
             return hb;
         }
-        
+
         public static List<Heartbeat> GetPlayerHeartbeatsBulk(List<long> playerIds)
         {
             var players = Players.Find(x => playerIds.Contains(x.PlayerId)).ToList();
@@ -223,7 +234,7 @@ namespace Ember2023.Classes.DBs
                 })
                 .ToList();
         }
-        
+
         public static Heartbeat? UpdatePlayerHeartbeat(
             long playerId,
             RoomInstance? roomInstance,
@@ -231,28 +242,31 @@ namespace Ember2023.Classes.DBs
             Platforms platform = Platforms.All,
             DeviceClasses deviceClasses = DeviceClasses.Unknown)
         {
-            var player = Players.FindById(playerId);
-
-            if (player != null)
+            lock (WriteLock)
             {
-                player.Player.PlayerExtra ??= new PlayerExtra();
-                player.Player.PlayerExtra.Heartbeat ??= new Heartbeat();
+                var player = Players.FindById(playerId);
 
-                var hb = player.Player.PlayerExtra.Heartbeat;
+                if (player != null)
+                {
+                    player.Player.PlayerExtra ??= new PlayerExtra();
+                    player.Player.PlayerExtra.Heartbeat ??= new Heartbeat();
 
-                hb.roomInstance = online ? roomInstance : null;
-                hb.errorCode = 0;
-                hb.isOnline = online;
+                    var hb = player.Player.PlayerExtra.Heartbeat;
 
-                if (hb.roomInstance != null)
-                    hb.roomInstance.dataBlob = "";
+                    hb.roomInstance = online ? roomInstance : null;
+                    hb.errorCode = 0;
+                    hb.isOnline = online;
 
-                Players.Update(player);
-                return hb;
-            }
-            else
-            {
-                return null; 
+                    if (hb.roomInstance != null)
+                        hb.roomInstance.dataBlob = "";
+
+                    Players.Update(player);
+                    return hb;
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
     }

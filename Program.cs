@@ -8,7 +8,8 @@ using Ember2023.Classes.DBs;
 using Ember2023.Classes.DBs.DBClasses;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
-using Ember2023.Classes;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace Ember2023
 {
@@ -51,7 +52,15 @@ namespace Ember2023
 
             builder.Services.AddHttpLogging(options =>
             {
-                options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
+                options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.None;
+            });
+
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.Limits.MaxConcurrentConnections = 500;
+                options.Limits.MaxRequestBodySize = 10 * 1024 * 1024;
+                options.Limits.MinResponseDataRate = null;
+                options.Limits.MinRequestBodyDataRate = null;
             });
 
             var app = builder.Build();
@@ -73,23 +82,34 @@ namespace Ember2023
                 ServeUnknownFileTypes = true,
                 DefaultContentType = "application/octet-stream"
             });
-            
-            // RoomDB.ImportRooms(Path.Combine(dataDir, "Imports", "ImportRooms.json")).Wait();
-            
+
             // Load and register loading screen URLs
+            string rewrittenLoadscreenJson = null;
             try
             {
                 var loadingscreenPath = Path.Combine(Program.dataDir, "Imports", "loadingscreen.json");
                 if (System.IO.File.Exists(loadingscreenPath))
                 {
                     var loadingscreenJson = await System.IO.File.ReadAllTextAsync(loadingscreenPath);
-                    Classes.LoadingScreenImageService.RewriteConfiguration(loadingscreenJson);
-                    Console.WriteLine("[LoadingScreenImageService] Registered loading screen URLs");
+                    rewrittenLoadscreenJson = Classes.LoadingScreenImageService.RewriteConfiguration(loadingscreenJson);
+                    var rewrittenPath = Path.Combine(Program.dataDir, "Imports", "loadingscreen.rewritten.json");
+                    await System.IO.File.WriteAllTextAsync(rewrittenPath, rewrittenLoadscreenJson);
+                    Console.WriteLine("[LoadingScreenImageService] Registered loading screen URLs and saved rewritten config");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[LoadingScreenImageService] Failed to load config: {ex.Message}");
+            }
+
+            // Mark all RRO rooms as cloneable/templates
+            try
+            {
+                RoomDB.MarkRROsAsCloneable();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[RoomDB] Failed to mark RROs as cloneable: {ex.Message}");
             }
                         
             Task.Run(() => Cloudflare.StartCloudflared());
