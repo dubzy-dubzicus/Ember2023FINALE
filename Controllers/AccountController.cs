@@ -42,16 +42,28 @@ namespace Ember2023.Controllers
         }
 
         [HttpPost("account/register")]
-        public IActionResult Register([FromBody] RegisterRequest req)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest req)
         {
-            if (string.IsNullOrWhiteSpace(req.Username) ||
-                string.IsNullOrWhiteSpace(req.Password) ||
-                string.IsNullOrWhiteSpace(req.DisplayName))
+            return await RegisterInternal(req.Username, req.Password, req.DisplayName);
+        }
+
+        [HttpPost("account/registerForm")]
+        public async Task<IActionResult> RegisterForm()
+        {
+            var form = Request.Form;
+            return await RegisterInternal(form["username"], form["password"], form["displayName"]);
+        }
+
+        private async Task<IActionResult> RegisterInternal(string username, string password, string displayName)
+        {
+            if (string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(password) ||
+                string.IsNullOrWhiteSpace(displayName))
             {
                 return BadRequest(new { error = "Missing required fields" });
             }
 
-            if (req.Password.Length < 4)
+            if (password.Length < 4)
             {
                 return BadRequest(new { error = "Password too short" });
             }
@@ -60,7 +72,7 @@ namespace Ember2023.Controllers
             var existing = PlayerDB.Players.Find(x =>
                 x.Player != null &&
                 x.Player.Username != null &&
-                x.Player.Username.Equals(req.Username, StringComparison.OrdinalIgnoreCase)
+                x.Player.Username.Equals(username, StringComparison.OrdinalIgnoreCase)
             ).FirstOrDefault();
 
             if (existing != null)
@@ -68,12 +80,12 @@ namespace Ember2023.Controllers
                 return BadRequest(new { error = "Username already taken" });
             }
 
-            var hash = BCrypt.Net.BCrypt.HashPassword(req.Password);
+            var hash = BCrypt.Net.BCrypt.HashPassword(password);
 
             var newPlayerData = new PDBC.Player
             {
-                Username = req.Username,
-                DisplayName = req.DisplayName,
+                Username = username,
+                DisplayName = displayName,
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow,
                 ProfileImage = "DefaultPFP.png",
@@ -105,7 +117,7 @@ namespace Ember2023.Controllers
 
             PlayerDB.Players.Insert(newFullPlayer);
 
-            Console.WriteLine($"[REGISTER] Created account {newFullPlayer.PlayerId}: {req.Username}");
+            Console.WriteLine($"[REGISTER] Created account {newFullPlayer.PlayerId}: {username}");
 
             return Ok(new
             {
@@ -117,9 +129,21 @@ namespace Ember2023.Controllers
         }
 
         [HttpPost("account/login")]
-        public IActionResult Login([FromBody] LoginRequest req)
+        public async Task<IActionResult> Login([FromBody] LoginRequest req)
         {
-            if (string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Password))
+            return await LoginInternal(req.Username, req.Password);
+        }
+
+        [HttpPost("account/loginForm")]
+        public async Task<IActionResult> LoginForm()
+        {
+            var form = Request.Form;
+            return await LoginInternal(form["username"], form["password"]);
+        }
+
+        private async Task<IActionResult> LoginInternal(string username, string password)
+        {
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
                 return BadRequest(new { error = "Missing username or password" });
             }
@@ -127,7 +151,7 @@ namespace Ember2023.Controllers
             var account = PlayerDB.Players.Find(x =>
                 x.Player != null &&
                 x.Player.Username != null &&
-                x.Player.Username.Equals(req.Username, StringComparison.OrdinalIgnoreCase)
+                x.Player.Username.Equals(username, StringComparison.OrdinalIgnoreCase)
             ).FirstOrDefault();
 
             if (account == null)
@@ -136,7 +160,7 @@ namespace Ember2023.Controllers
             }
 
             if (string.IsNullOrEmpty(account.Password) ||
-                !BCrypt.Net.BCrypt.Verify(req.Password, account.Password))
+                !BCrypt.Net.BCrypt.Verify(password, account.Password))
             {
                 return BadRequest(new { error = "Invalid username or password" });
             }
