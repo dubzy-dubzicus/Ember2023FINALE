@@ -1,26 +1,27 @@
-using Microsoft.AspNetCore.Mvc;
-using static System.Net.Mime.MediaTypeNames;
+﻿using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using System.IO;
 
 namespace Ember2023.Controllers
 {
-	[ApiController]
+    [ApiController]
     public class ImageController : ControllerBase
     {
+        private const int MaxServedDimension = 2048;
+
         [Route("/imageserver/{*img_path}")]
+        [Route("/imageserver-v2/{*img_path}")]
         public async Task<IActionResult> ImgServer(string img_path, int width = 0, int height = 0, string sig = "p1")
         {
             img_path = Uri.UnescapeDataString(img_path ?? "").TrimStart('/');
 
-            HttpContext.Response.Headers.Append("content-signature", "key-id=KEY:RSA:p1.rec.net; data=IWwe/pZ5vWWqNSkSM/54isgDxlZkdrP0sUrppKCbNktO2yCOTjq746xWiiLsueGuVcAGQqkjeRTimxolHckS/YXSYkEJxtiCXbLlsRia2DyAqtWVkGWsfczzFhp/56U66FVzolTspPCvjScOVlGO7dDIK7sJ+ndcRauWjsQsC6g3e7rUc6uwY099a6gy7sw6xr5BFZQSz8wg+fqyHYD/Sc4nQQVOTFZNNASqbJYhpNhEMXRnafCMuLl8a3mkGwvy3t4q2D/7SM48xrGZjEV47qNx1A91KCe28XVToFh4BzwEUU8nZ0d+KwV79MGarLo1cY8igc8FcoThKcovI4ClOg==");
-            HttpContext.Response.Headers.Append("Content-Disposition", $"inline; filename=\"{Path.GetFileName(img_path)}\"");
             HttpContext.Response.Headers.Append("Access-Control-Allow-Origin", "*");
             HttpContext.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type, Authorization, Cache-Control");
-            HttpContext.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-            Response.Headers["Cache-Control"] = "public, max-age=14400";
+            HttpContext.Response.Headers.Append("Access-Control-Allow-Methods", "GET, OPTIONS");
+            HttpContext.Response.Headers.Append("Cache-Control", "public, max-age=14400");
 
             var etag = $"\"{img_path.GetHashCode()}\"";
             HttpContext.Response.Headers.Append("ETag", etag);
