@@ -61,13 +61,29 @@ namespace Ember2023.Controllers
                 {
                     var imageBytes = await System.IO.File.ReadAllBytesAsync(foundLocalPath);
                     imageBytes = await ProcessImageAsync(imageBytes, cropSquare, width, height);
-                    return File(imageBytes, "image/png");
+                    return File(imageBytes, GetMimeType(img_path));
                 }
                 catch
                 {
                     var fallbackBytes = await System.IO.File.ReadAllBytesAsync(foundLocalPath);
-                    return File(fallbackBytes, "image/png");
+                    return File(fallbackBytes, GetMimeType(img_path));
                 }
+            }
+
+            // Try LoadingScreenImageService for RemoteLoadingScreens URLs
+            try
+            {
+                var localImagePath = await Classes.LoadingScreenImageService.GetLocalImageAsync(img_path, HttpContext.RequestAborted);
+                if (localImagePath != null && System.IO.File.Exists(localImagePath))
+                {
+                    var imageBytes = await System.IO.File.ReadAllBytesAsync(localImagePath);
+                    imageBytes = await ProcessImageAsync(imageBytes, cropSquare, width, height);
+                    return File(imageBytes, GetMimeType(localImagePath));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[LoadingScreenImageService] Failed for {img_path}: {ex.Message}");
             }
 
             string recNetLocalPath = Path.Combine(baseImagesPath, "RecNet", img_path);

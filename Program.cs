@@ -8,6 +8,7 @@ using Ember2023.Classes.DBs;
 using Ember2023.Classes.DBs.DBClasses;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
+using Ember2023.Classes;
 
 namespace Ember2023
 {
@@ -74,6 +75,22 @@ namespace Ember2023
             });
             
             // RoomDB.ImportRooms(Path.Combine(dataDir, "Imports", "ImportRooms.json")).Wait();
+            
+            // Load and register loading screen URLs
+            try
+            {
+                var loadingscreenPath = Path.Combine(Program.dataDir, "Imports", "loadingscreen.json");
+                if (System.IO.File.Exists(loadingscreenPath))
+                {
+                    var loadingscreenJson = await System.IO.File.ReadAllTextAsync(loadingscreenPath);
+                    Classes.LoadingScreenImageService.RewriteConfiguration(loadingscreenJson);
+                    Console.WriteLine("[LoadingScreenImageService] Registered loading screen URLs");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[LoadingScreenImageService] Failed to load config: {ex.Message}");
+            }
                         
             Task.Run(() => Cloudflare.StartCloudflared());
             
