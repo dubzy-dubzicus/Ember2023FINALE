@@ -65,77 +65,14 @@ namespace Ember2023.Classes
                 return Cache.Count;
             }
         }
-    }
-
-    public static class DatabaseOptimizer
-    {
-        private static readonly object DbLock = new();
-        private static long LastOptimization = 0;
-
-        public static void OptimizeAllDatabases()
-        {
-            lock (DbLock)
-            {
-                var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                if (now - LastOptimization < 300) // Only once per 5 minutes
-                    return;
-
-                LastOptimization = now;
-
-                try
-                {
-                    // Compact LiteDB databases
-                    var dbPaths = new[]
-                    {
-                        "Players.db",
-                        "Rooms.db",
-                        "EmberRooms.db",
-                        "Friends.db",
-                        "EmberClubs.db",
-                        "Inventions.db",
-                        "Chat.db",
-                        "Parties.db",
-                        "Economy.db",
-                        "DailyRewards.db",
-                        "Moderation.db",
-                        "RoomSettings.db"
-                    };
-
-                    foreach (var dbName in dbPaths)
-                    {
-                        try
-                        {
-                            var path = Path.Combine(Program.dataDir, "DBs", dbName);
-                            if (System.IO.File.Exists(path))
-                            {
-                                // LiteDB auto-compacts, but we can force a checkpoint
-                                Console.WriteLine($"[DB Optimizer] Checked {dbName}");
-                            }
-                        }
-                        catch
-                        {
-                            // Ignore individual DB errors
-                        }
-                    }
-
-                    Console.WriteLine("[DB Optimizer] Database optimization complete");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[DB Optimizer] Error: {ex.Message}");
-                }
-            }
-        }
 
         public static void WarmCache()
         {
-            // Pre-load frequently accessed data
             try
             {
                 var rooms = Ember2023.Classes.DBs.RoomDB.Rooms.FindAll().ToList();
                 CacheService.Set("all_rooms", rooms, TimeSpan.FromMinutes(10));
 
-                // Cache all static item lists
                 CacheService.Set("item_backpackSkins", BackpackSkinsList(), TimeSpan.FromHours(1));
                 CacheService.Set("item_paintPistols", PaintPistolsList(), TimeSpan.FromHours(1));
                 CacheService.Set("item_foods", FoodsList(), TimeSpan.FromHours(1));
@@ -312,5 +249,52 @@ namespace Ember2023.Classes
             new { id = "gadget_hookshot", name = "Hookshot", type = "gadget", rarity = "epic", imageName = "gadget_hookshot.png" },
             new { id = "gadget_balloon", name = "Balloon", type = "gadget", rarity = "common", imageName = "gadget_balloon.png" },
         };
+    }
+
+    public static class DatabaseOptimizer
+    {
+        private static readonly object DbLock = new();
+        private static long LastOptimization = 0;
+
+        public static void OptimizeAllDatabases()
+        {
+            lock (DbLock)
+            {
+                var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                if (now - LastOptimization < 300)
+                    return;
+
+                LastOptimization = now;
+
+                try
+                {
+                    var dbPaths = new[]
+                    {
+                        "Players.db", "Rooms.db", "EmberRooms.db", "Friends.db",
+                        "EmberClubs.db", "Inventions.db", "Chat.db", "Parties.db",
+                        "Economy.db", "DailyRewards.db", "Moderation.db", "RoomSettings.db"
+                    };
+
+                    foreach (var dbName in dbPaths)
+                    {
+                        try
+                        {
+                            var path = Path.Combine(Program.dataDir, "DBs", dbName);
+                            if (System.IO.File.Exists(path))
+                            {
+                                Console.WriteLine($"[DB Optimizer] Checked {dbName}");
+                            }
+                        }
+                        catch { }
+                    }
+
+                    Console.WriteLine("[DB Optimizer] Database optimization complete");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[DB Optimizer] Error: {ex.Message}");
+                }
+            }
+        }
     }
 }
