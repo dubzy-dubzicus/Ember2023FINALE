@@ -8,6 +8,7 @@ namespace Ember2023.Controllers
 {
     [ApiController]
     [Route("/clubs")]
+    [Route("/api/clubs")]
     public class ClubsController : ControllerBase
     {
         private static readonly LiteDatabase ClubsDb =

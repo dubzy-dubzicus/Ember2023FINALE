@@ -7,6 +7,7 @@ namespace Ember2023.Controllers
 {
     [ApiController]
     [Route("/inventions")]
+    [Route("/api/inventions")]
     public class InventionsController : ControllerBase
     {
         [HttpGet("v2/mine")]

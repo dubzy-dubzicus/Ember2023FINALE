@@ -400,14 +400,13 @@ namespace Ember2023.Controllers
         [HttpGet("/api/avatar/v2/gifts")]
         [HttpGet("/api/gamerewards/v1/pending")]
         [HttpGet("/api/roomkeys/v1/mine")]
-        [HttpGet("/cdn/config/LoadingScreenTipData")]
         [HttpGet("/api/roomcurrencies/v1/currencies")]
-        [HttpGet("/api/inventions/v2/mine")]
         public IActionResult TodoImplement()
         {
             return Ok(ServerConfig.Bracket);
         }
         
+        [HttpGet("/cdn/config/LoadingScreenTipData")]
         [HttpGet("/api/loadingscreen/v1/config")]
         public IActionResult GetLoadingScreenConfig()
         {
@@ -444,6 +443,35 @@ namespace Ember2023.Controllers
         public IActionResult CustomAvatarItemsIsEnabled()
         {
             return Ok(true);
+        }
+
+        [HttpGet("/econ/customAvatarItems/v1/owned")]
+        [HttpGet("/api/customAvatarItems/v1/owned")]
+        public IActionResult GetOwnedCustomAvatarItems()
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null)
+                return Unauthorized();
+
+            var player = PlayerDB.Players.FindById((long)id);
+            if (player == null || player.Player == null)
+                return Ok(new { Results = new List<object>(), TotalResults = 0 });
+
+            return Ok(new
+            {
+                Results = player.Player.PlayerExtra.AvatarItems.Select(i => new
+                {
+                    customAvatarItemId = i,
+                    itemId = i,
+                    instanceId = i,
+                    name = "Custom Item",
+                    description = "",
+                    imageName = "",
+                    rarity = "Common",
+                    type = "Clothing"
+                }).ToList(),
+                TotalResults = player.Player.PlayerExtra.AvatarItems.Count
+            });
         }
         
         [HttpGet("/api/roomconsumables/v1/roomConsumable/room/{roomId}")]
