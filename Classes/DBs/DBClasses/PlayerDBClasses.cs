@@ -72,6 +72,8 @@ namespace Ember2023.Classes.DBs.DBClasses
             public Avatar Avatar { get; set; } = new Avatar();
             public List<string> AvatarItems { get; set; } = new();
             public List<SavedOutfit> SavedAvatars { get; set; } = new();
+            public Dictionary<string, string> Wearables { get; set; } = new();
+            public List<string> EquippedEmotes { get; set; } = new();
             public ModerationBlockDetails? ModerationBlockDetails { get; set; } = new ModerationBlockDetails();
             public List<Setting> Settings { get; set; } = new();
             public Heartbeat Heartbeat { get; set; } = new Heartbeat();

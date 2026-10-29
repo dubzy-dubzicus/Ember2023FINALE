@@ -2,7 +2,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Ember2023;
+using Microsoft.AspNetCore.ResponseCompression;
 using Ember2023.Classes;
 using Ember2023.Classes.DBs;
 using Ember2023.Classes.DBs.DBClasses;
@@ -50,6 +52,14 @@ namespace Ember2023
                 o.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
 
+            builder.Services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/json", "image/png", "image/jpeg" }
+                );
+            });
+
             builder.Services.AddHttpLogging(options =>
             {
                 options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.None;
@@ -69,10 +79,59 @@ namespace Ember2023
             
             app.UseWebSockets();
             
+            app.UseResponseCompression();
+            
             app.UseRouting();
             
             app.UseAuthorization();
 
+            // Rate limiting middleware
+            var rateLimitLock = new object();
+            var rateLimitClients = new Dictionary<string, (List<DateTime> LastMinute, List<DateTime> LastHour)>();
+            const int MaxPerMinute = 600;
+            const int MaxPerHour = 36000;
+
+            app.Use(async (context, next) =>
+            {
+                var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                var path = context.Request.Path.Value ?? "";
+                bool allowRequest = true;
+
+                lock (rateLimitLock)
+                {
+                    if (!rateLimitClients.TryGetValue(ip, out var entry))
+                    {
+                        entry = (new List<DateTime>(), new List<DateTime>());
+                        rateLimitClients[ip] = entry;
+                    }
+
+                    var now = DateTime.UtcNow;
+                    entry.LastMinute.RemoveAll(t => now - t > TimeSpan.FromMinutes(1));
+                    entry.LastHour.RemoveAll(t => now - t > TimeSpan.FromHours(1));
+
+                    if (entry.LastMinute.Count >= MaxPerMinute || entry.LastHour.Count >= MaxPerHour)
+                    {
+                        allowRequest = false;
+                    }
+                    else
+                    {
+                        entry.LastMinute.Add(now);
+                        entry.LastHour.Add(now);
+                    }
+                }
+
+                if (!allowRequest)
+                {
+                    context.Response.StatusCode = 429;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync("{\"error\":\"rate_limit_exceeded\",\"message\":\"Too many requests\"}");
+                    return;
+                }
+
+                Ember2023.Controllers.HealthController.IncrementRequestCount(path);
+                await next();
+            });
+            
             app.MapControllers();
             
             app.UseStaticFiles(new StaticFileOptions
@@ -110,6 +169,16 @@ namespace Ember2023
             catch (Exception ex)
             {
                 Console.WriteLine($"[RoomDB] Failed to mark RROs as cloneable: {ex.Message}");
+            }
+
+            // Warm cache with static data
+            try
+            {
+                CacheService.WarmCache();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Cache Warmer] Failed: {ex.Message}");
             }
                         
             Task.Run(() => Cloudflare.StartCloudflared());

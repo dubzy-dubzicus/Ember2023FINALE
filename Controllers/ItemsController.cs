@@ -49,6 +49,11 @@ namespace Ember2023.Controllers
             new { id = "paint_pistol_copper", name = "Copper Paint Pistol", type = "paint_pistol", rarity = "rare", color = "copper", imageName = "paint_pistol_copper.png" },
             new { id = "paint_pistol_neon", name = "Neon Paint Pistol", type = "paint_pistol", rarity = "epic", color = "neon", imageName = "paint_pistol_neon.png" },
             new { id = "paint_pistol_galaxy", name = "Galaxy Paint Pistol", type = "paint_pistol", rarity = "legendary", color = "galaxy", imageName = "paint_pistol_galaxy.png" },
+            new { id = "paint_pistol_chrome", name = "Chrome Paint Pistol", type = "paint_pistol", rarity = "epic", color = "chrome", imageName = "paint_pistol_chrome.png" },
+            new { id = "paint_pistol_matte", name = "Matte Paint Pistol", type = "paint_pistol", rarity = "rare", color = "matte", imageName = "paint_pistol_matte.png" },
+            new { id = "paint_pistol_glow", name = "Glow Paint Pistol", type = "paint_pistol", rarity = "epic", color = "glow", imageName = "paint_pistol_glow.png" },
+            new { id = "paint_pistol_void", name = "Void Paint Pistol", type = "paint_pistol", rarity = "legendary", color = "void", imageName = "paint_pistol_void.png" },
+            new { id = "paint_pistol_prism", name = "Prism Paint Pistol", type = "paint_pistol", rarity = "legendary", color = "prism", imageName = "paint_pistol_prism.png" },
         };
 
         // All food/consumable items
@@ -72,6 +77,15 @@ namespace Ember2023.Controllers
             new { id = "food_burger_cheese", name = "Cheeseburger", type = "food", rarity = "common", imageName = "food_burger_cheese.png" },
             new { id = "food_pizza_pepperoni", name = "Pepperoni Pizza", type = "food", rarity = "rare", imageName = "food_pizza_pepperoni.png" },
             new { id = "food_salad", name = "Salad", type = "food", rarity = "common", imageName = "food_salad.png" },
+            new { id = "food_sandwich", name = "Sandwich", type = "food", rarity = "common", imageName = "food_sandwich.png" },
+            new { id = "food_soup", name = "Soup", type = "food", rarity = "common", imageName = "food_soup.png" },
+            new { id = "food_steak", name = "Steak", type = "food", rarity = "rare", imageName = "food_steak.png" },
+            new { id = "food_sushi_roll", name = "Sushi Roll", type = "food", rarity = "rare", imageName = "food_sushi_roll.png" },
+            new { id = "food_cupcake", name = "Cupcake", type = "food", rarity = "common", imageName = "food_cupcake.png" },
+            new { id = "food_cookie", name = "Cookie", type = "food", rarity = "common", imageName = "food_cookie.png" },
+            new { id = "food_pie", name = "Pie", type = "food", rarity = "rare", imageName = "food_pie.png" },
+            new { id = "food_pancakes", name = "Pancakes", type = "food", rarity = "common", imageName = "food_pancakes.png" },
+            new { id = "food_waffles", name = "Waffles", type = "food", rarity = "common", imageName = "food_waffles.png" },
         };
 
         // All maker pen tools
@@ -165,6 +179,7 @@ namespace Ember2023.Controllers
         [HttpGet("v1/all")]
         public IActionResult GetAllItems()
         {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
             return Ok(new
             {
                 backpackSkins = BackpackSkins,
@@ -181,31 +196,67 @@ namespace Ember2023.Controllers
         }
 
         [HttpGet("v1/backpackSkins")]
-        public IActionResult GetBackpackSkins() => Ok(BackpackSkins);
+        public IActionResult GetBackpackSkins()
+        {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
+            return Ok(BackpackSkins);
+        }
 
         [HttpGet("v1/paintPistols")]
-        public IActionResult GetPaintPistols() => Ok(PaintPistols);
+        public IActionResult GetPaintPistols()
+        {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
+            return Ok(PaintPistols);
+        }
 
         [HttpGet("v1/foods")]
-        public IActionResult GetFoods() => Ok(Foods);
+        public IActionResult GetFoods()
+        {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
+            return Ok(Foods);
+        }
 
         [HttpGet("v1/makerTools")]
-        public IActionResult GetMakerTools() => Ok(MakerTools);
+        public IActionResult GetMakerTools()
+        {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
+            return Ok(MakerTools);
+        }
 
         [HttpGet("v1/clothing")]
-        public IActionResult GetClothing() => Ok(Clothing);
+        public IActionResult GetClothing()
+        {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
+            return Ok(Clothing);
+        }
 
         [HttpGet("v1/emotes")]
-        public IActionResult GetEmotes() => Ok(Emotes);
+        public IActionResult GetEmotes()
+        {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
+            return Ok(Emotes);
+        }
 
         [HttpGet("v1/stamps")]
-        public IActionResult GetStamps() => Ok(Stamps);
+        public IActionResult GetStamps()
+        {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
+            return Ok(Stamps);
+        }
 
         [HttpGet("v1/stickers")]
-        public IActionResult GetStickers() => Ok(Stickers);
+        public IActionResult GetStickers()
+        {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
+            return Ok(Stickers);
+        }
 
         [HttpGet("v1/gadgets")]
-        public IActionResult GetGadgets() => Ok(Gadgets);
+        public IActionResult GetGadgets()
+        {
+            Response.Headers.Append("Cache-Control", "public, max-age=600");
+            return Ok(Gadgets);
+        }
 
         [HttpGet("v1/{itemId}")]
         public IActionResult GetItem(string itemId)
