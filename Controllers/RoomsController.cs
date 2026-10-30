@@ -135,6 +135,67 @@ namespace Ember2023.Controllers
             });
         }
 
+        [HttpPost("v1/clone/{sourceRoomId}")]
+        public IActionResult CloneRoom(string sourceRoomId, [FromBody] CloneRoomRequest request)
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null)
+                return Unauthorized();
+
+            var sourceRoom = RoomEntries.FindOne(r => r.RoomId == sourceRoomId);
+            if (sourceRoom == null)
+                return NotFound(new { error = "Source room not found" });
+
+            if (!sourceRoom.CloningAllowed)
+                return BadRequest(new { error = "Room cloning is not allowed" });
+
+            var clonedRoom = new RoomEntry
+            {
+                AccountId = (long)id,
+                Name = request.Name ?? $"Copy of {sourceRoom.Name}",
+                Description = request.Description ?? sourceRoom.Description,
+                CloningAllowed = request.CloningAllowed ?? sourceRoom.CloningAllowed,
+                IsRRO = sourceRoom.IsRRO,
+                ImageName = sourceRoom.ImageName,
+            };
+            RoomEntries.Insert(clonedRoom);
+
+            return Ok(new
+            {
+                roomId = clonedRoom.RoomId,
+                name = clonedRoom.Name,
+                description = clonedRoom.Description,
+                cloningAllowed = clonedRoom.CloningAllowed,
+                isRRO = clonedRoom.IsRRO,
+                imageName = clonedRoom.ImageName,
+                clonedFrom = sourceRoomId,
+                createdAt = clonedRoom.CreatedAt
+            });
+        }
+
+        [HttpGet("v1/templates")]
+        public IActionResult GetRoomTemplates()
+        {
+            var templates = RoomEntries.Find(r => r.CloningAllowed && r.IsRRO)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+
+            return Ok(new
+            {
+                Results = templates.Select(r => new
+                {
+                    roomId = r.RoomId,
+                    name = r.Name,
+                    description = r.Description,
+                    cloningAllowed = r.CloningAllowed,
+                    isRRO = r.IsRRO,
+                    imageName = r.ImageName,
+                    createdAt = r.CreatedAt
+                }).ToList(),
+                TotalResults = templates.Count
+            });
+        }
+
         public class CreateRoomRequest
         {
             public string? Name { get; set; }
@@ -142,6 +203,13 @@ namespace Ember2023.Controllers
             public bool CloningAllowed { get; set; } = true;
             public bool IsRRO { get; set; } = true;
             public string? ImageName { get; set; }
+        }
+
+        public class CloneRoomRequest
+        {
+            public string? Name { get; set; }
+            public string? Description { get; set; }
+            public bool? CloningAllowed { get; set; }
         }
     }
 }

@@ -46,6 +46,19 @@ namespace Ember2023.Controllers
             (7, 500, 5),
         };
 
+        // Streak bonus multipliers: every 7-day streak milestone
+        private static readonly (int StreakDays, double Multiplier)[] StreakBonuses = new[]
+        {
+            (7, 1.5),
+            (14, 2.0),
+            (21, 2.5),
+            (28, 3.0),
+            (35, 3.5),
+            (42, 4.0),
+            (49, 4.5),
+            (50, 5.0),
+        };
+
         [HttpGet("v1/status")]
         public IActionResult GetStatus()
         {
@@ -62,6 +75,15 @@ namespace Ember2023.Controllers
 
             bool canClaim = CanClaim(reward.LastClaimedAt);
             int nextDay = Math.Min(reward.StreakCount + 1, RewardTiers.Length);
+            double nextMultiplier = 1.0;
+            foreach (var bonus in StreakBonuses.OrderByDescending(b => b.StreakDays))
+            {
+                if (nextDay >= bonus.StreakDays)
+                {
+                    nextMultiplier = bonus.Multiplier;
+                    break;
+                }
+            }
 
             return Ok(new
             {
@@ -71,7 +93,8 @@ namespace Ember2023.Controllers
                 lastClaimedAt = reward.LastClaimedAt == DateTime.MinValue ? null : reward.LastClaimedAt.ToString("O"),
                 canClaim = canClaim,
                 nextDayTokens = canClaim ? RewardTiers[Math.Min(nextDay - 1, RewardTiers.Length - 1)].Tokens : 0,
-                nextDayTickets = canClaim ? RewardTiers[Math.Min(nextDay - 1, RewardTiers.Length - 1)].Tickets : 0
+                nextDayTickets = canClaim ? RewardTiers[Math.Min(nextDay - 1, RewardTiers.Length - 1)].Tickets : 0,
+                nextDayMultiplier = nextMultiplier,
             });
         }
 
@@ -96,8 +119,22 @@ namespace Ember2023.Controllers
             // Calculate streak
             int newStreak = reward.LastClaimedAt == DateTime.MinValue ? 1 : reward.StreakCount + 1;
             int dayIndex = Math.Min(newStreak - 1, RewardTiers.Length - 1);
-            int tokens = RewardTiers[dayIndex].Tokens;
-            int tickets = RewardTiers[dayIndex].Tickets;
+            int baseTokens = RewardTiers[dayIndex].Tokens;
+            int baseTickets = RewardTiers[dayIndex].Tickets;
+
+            // Calculate streak bonus multiplier
+            double streakMultiplier = 1.0;
+            foreach (var bonus in StreakBonuses.OrderByDescending(b => b.StreakDays))
+            {
+                if (newStreak >= bonus.StreakDays)
+                {
+                    streakMultiplier = bonus.Multiplier;
+                    break;
+                }
+            }
+
+            int tokens = (int)(baseTokens * streakMultiplier);
+            int tickets = baseTickets;
 
             reward.StreakCount = newStreak;
             reward.LastClaimedAt = DateTime.UtcNow;
@@ -110,6 +147,7 @@ namespace Ember2023.Controllers
                 var economyDb = new LiteDatabase(Path.Combine(Program.dataDir, "DBs", "Economy.db"));
                 var balances = economyDb.GetCollection<BsonDocument>("TokenBalances");
                 var existing = balances.Find(Query.EQ("AccountId", accountId)).FirstOrDefault();
+                int totalTokens = tokens;
                 if (existing == null)
                 {
                     var doc = new BsonDocument
@@ -127,20 +165,17 @@ namespace Ember2023.Controllers
                     existing["Tickets"] = existing["Tickets"].AsInt32 + tickets;
                     existing["UpdatedAt"] = DateTime.UtcNow;
                     balances.Update(existing);
-                }
-                economyDb.Dispose();
-
-                int totalTokens = tokens;
-                if (existing != null)
-                {
                     totalTokens = existing["Tokens"].AsInt32;
                 }
+                economyDb.Dispose();
 
                 return Ok(new
                 {
                     accountId = accountId,
                     streakCount = newStreak,
                     tokensEarned = tokens,
+                    baseTokens = baseTokens,
+                    streakMultiplier = streakMultiplier,
                     ticketsEarned = tickets,
                     totalTokens = totalTokens,
                     claimedAt = reward.LastClaimedAt.ToString("O")

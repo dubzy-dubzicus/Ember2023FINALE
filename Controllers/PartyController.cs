@@ -23,6 +23,9 @@ namespace Ember2023.Controllers
             Parties.EnsureIndex(p => p.LeaderAccountId);
             PartyMembers.EnsureIndex(pm => pm.PartyId);
             PartyMembers.EnsureIndex(pm => pm.AccountId);
+            PartyInvites.EnsureIndex(i => i.PartyId);
+            PartyInvites.EnsureIndex(i => i.InvitedAccountId);
+            PartyInvites.EnsureIndex(i => i.InviterAccountId);
         }
 
         public class PartyEntry
@@ -259,6 +262,189 @@ namespace Ember2023.Controllers
             }
 
             return Ok(new { Results = results, TotalResults = results.Count });
+        }
+
+        // Private LiteDB collection for pending party invites
+        private static readonly LiteDatabase InviteDb =
+            new(Path.Combine(Program.dataDir, "DBs", "PartyInvites.db"));
+        private static readonly ILiteCollection<PartyInviteEntry> PartyInvites =
+            InviteDb.GetCollection<PartyInviteEntry>("PartyInvites");
+
+        public class PartyInviteEntry
+        {
+            [BsonId]
+            public string Id { get; set; } = Guid.NewGuid().ToString("N");
+            public string InviteId { get; set; } = Guid.NewGuid().ToString("N");
+            public string PartyId { get; set; } = "";
+            public long InviterAccountId { get; set; }
+            public long InvitedAccountId { get; set; }
+            public string Status { get; set; } = "pending"; // pending, accepted, declined, expired
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+            public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddMinutes(10);
+        }
+
+        public class InvitePlayerRequest
+        {
+            public string PartyId { get; set; } = "";
+            public long TargetAccountId { get; set; }
+        }
+
+        public class InviteResponseRequest
+        {
+            public string InviteId { get; set; } = "";
+            public bool Accept { get; set; }
+        }
+
+        [HttpPost("v1/invite")]
+        public IActionResult InvitePlayer([FromBody] InvitePlayerRequest request)
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null)
+                return Unauthorized();
+
+            long inviterId = (long)id;
+            var party = Parties.FindOne(p => p.PartyId == request.PartyId);
+            if (party == null)
+                return NotFound(new { error = "Party not found" });
+
+            if (party.LeaderAccountId != inviterId)
+                return StatusCode(403, new { error = "Only party leader can invite" });
+
+            var memberCount = PartyMembers.Count(pm => pm.PartyId == request.PartyId);
+            if (memberCount >= party.MaxMembers)
+                return BadRequest(new { error = "Party is full" });
+
+            var targetPlayer = PlayerDB.Players.FindById(request.TargetAccountId);
+            if (targetPlayer == null)
+                return NotFound(new { error = "Target player not found" });
+
+            // Cancel any existing pending invite
+            PartyInvites.DeleteMany(i => i.PartyId == request.PartyId && i.InvitedAccountId == request.TargetAccountId && i.Status == "pending");
+
+            var invite = new PartyInviteEntry
+            {
+                PartyId = request.PartyId,
+                InviterAccountId = inviterId,
+                InvitedAccountId = request.TargetAccountId,
+                Status = "pending",
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+            };
+            PartyInvites.Insert(invite);
+
+            return Ok(new
+            {
+                success = true,
+                inviteId = invite.InviteId,
+                partyId = request.PartyId,
+                invitedAccountId = request.TargetAccountId,
+                expiresAt = invite.ExpiresAt.ToString("O")
+            });
+        }
+
+        [HttpGet("v1/invites/pending")]
+        public IActionResult GetPendingInvites()
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null)
+                return Unauthorized();
+
+            long accountId = (long)id;
+            var invites = PartyInvites.Find(i => i.InvitedAccountId == accountId && i.Status == "pending" && i.ExpiresAt > DateTime.UtcNow)
+                .OrderByDescending(i => i.CreatedAt)
+                .ToList();
+
+            return Ok(new
+            {
+                Results = invites.Select(i => new
+                {
+                    inviteId = i.InviteId,
+                    partyId = i.PartyId,
+                    inviterAccountId = i.InviterAccountId,
+                    inviterUsername = PlayerDB.Players.FindById(i.InviterAccountId)?.Player?.Username ?? "Unknown",
+                    createdAt = i.CreatedAt.ToString("O"),
+                    expiresAt = i.ExpiresAt.ToString("O")
+                }).ToList(),
+                TotalResults = invites.Count
+            });
+        }
+
+        [HttpPost("v1/invite/respond")]
+        public IActionResult RespondToInvite([FromBody] InviteResponseRequest request)
+        {
+            var id = AuthStuff.GetPlayerId(Request);
+            if (id == null)
+                return Unauthorized();
+
+            long accountId = (long)id;
+            var invite = PartyInvites.FindOne(i => i.InviteId == request.InviteId && i.InvitedAccountId == accountId && i.Status == "pending");
+
+            if (invite == null)
+                return NotFound(new { error = "Invite not found or already responded" });
+
+            if (invite.ExpiresAt < DateTime.UtcNow)
+            {
+                invite.Status = "expired";
+                PartyInvites.Update(invite);
+                return BadRequest(new { error = "Invite has expired" });
+            }
+
+            if (request.Accept)
+            {
+                var party = Parties.FindOne(p => p.PartyId == invite.PartyId);
+                if (party == null)
+                {
+                    invite.Status = "declined";
+                    PartyInvites.Update(invite);
+                    return NotFound(new { error = "Party not found" });
+                }
+
+                var memberCount = PartyMembers.Count(pm => pm.PartyId == invite.PartyId);
+                if (memberCount >= party.MaxMembers)
+                {
+                    invite.Status = "declined";
+                    PartyInvites.Update(invite);
+                    return BadRequest(new { error = "Party is full" });
+                }
+
+                var existing = PartyMembers.FindOne(pm => pm.PartyId == invite.PartyId && pm.AccountId == accountId);
+                if (existing != null)
+                {
+                    invite.Status = "declined";
+                    PartyInvites.Update(invite);
+                    return BadRequest(new { error = "Already a member of this party" });
+                }
+
+                PartyMembers.Insert(new PartyMemberEntry
+                {
+                    PartyId = invite.PartyId,
+                    AccountId = accountId,
+                    Role = "member",
+                    JoinedAt = DateTime.UtcNow
+                });
+
+                invite.Status = "accepted";
+                PartyInvites.Update(invite);
+
+                return Ok(new
+                {
+                    success = true,
+                    partyId = invite.PartyId,
+                    action = "accepted"
+                });
+            }
+            else
+            {
+                invite.Status = "declined";
+                PartyInvites.Update(invite);
+
+                return Ok(new
+                {
+                    success = true,
+                    inviteId = invite.InviteId,
+                    action = "declined"
+                });
+            }
         }
     }
 }
