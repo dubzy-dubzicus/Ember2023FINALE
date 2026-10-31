@@ -279,8 +279,14 @@ namespace Ember2023.Controllers
         {
             string buildHeader = Request.Headers["X-EMBER-Build"].ToString();
 
-            if (string.IsNullOrWhiteSpace(buildHeader) ||
-                !Version.TryParse(buildHeader, out var build) ||
+            if (string.IsNullOrWhiteSpace(buildHeader))
+            {
+                // Stock client without Ember patch - allow login but log warning
+                Console.WriteLine("[MOD GATE] No X-EMBER-Build header - stock client login allowed");
+                return null;
+            }
+
+            if (!Version.TryParse(buildHeader, out var build) ||
                 build < new Version(0, 0, 1))
             {
                 return OutdatedPatch();
