@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Ember2023.Classes;
 using Ember2023.Classes.DBs;
 using Ember2023.Classes.DBs.DBClasses;
@@ -14,6 +14,12 @@ namespace Ember2023.Controllers
         [HttpGet("/")]
         public IActionResult GetNS()
         {
+            var accept = Request.Headers["Accept"].ToString();
+            if (accept.Contains("text/html"))
+            {
+                return Redirect("/Home/Index");
+            }
+
             string url = ServerConfig.BaseURL;
             return Ok(new
             {
@@ -321,20 +327,6 @@ namespace Ember2023.Controllers
             return NoContent();
         }
         
-        [HttpGet("/econ/customAvatarItems/v1/owned")]
-        public IActionResult GetMyOwnedCustomAvatarItems([FromQuery] int skip, [FromQuery] int take)
-        {
-            var id = AuthStuff.GetPlayerId(Request);
-            if (id == null) 
-            	return Unauthorized();
-                
-            return Ok(new 
-            {
-            	Results = Array.Empty<object>(),
-                TotalResults = 0
-            });
-        }
-        
         [HttpGet("/api/checklist/v1/current")]
         public IActionResult GetMyChecklist()
         {
@@ -445,21 +437,52 @@ namespace Ember2023.Controllers
             return Ok(true);
         }
 
-        [HttpGet("/econ/customAvatarItems/v1/owned")]
-        [HttpGet("/api/customAvatarItems/v1/owned")]
-        public IActionResult GetOwnedCustomAvatarItems()
+        [HttpGet("/test/debug")]
+        public IActionResult TestDebug()
         {
-            var id = AuthStuff.GetPlayerId(Request);
-            if (id == null)
-                return Unauthorized();
+            return Ok(new { message = "test endpoint works", timestamp = DateTime.UtcNow });
+        }
 
-            var player = PlayerDB.Players.FindById((long)id);
-            if (player == null || player.Player == null)
-                return Ok(new { Results = new List<object>(), TotalResults = 0 });
-
-            return Ok(new
+        [HttpGet("/test/error")]
+        public IActionResult TestError()
+        {
+            try
             {
-                Results = player.Player.PlayerExtra.AvatarItems.Select(i => new
+                throw new Exception("Test exception");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[API] Test error caught: {ex.Message}");
+                return StatusCode(500, new { error = "test error", stackTrace = "" });
+            }
+        }
+
+        [HttpGet("/test/avatar-step1")]
+        public IActionResult TestAvatarStep1()
+        {
+            try
+            {
+                Console.WriteLine("[DEBUG] Step 1: Getting player ID");
+                var id = AuthStuff.GetPlayerId(Request);
+                Console.WriteLine($"[DEBUG] Player ID: {id}");
+                
+                if (id == null)
+                    return Unauthorized();
+                
+                Console.WriteLine($"[DEBUG] Step 1 OK - Player ID: {id}");
+                
+                var player = PlayerDB.Players.FindById((long)id);
+                Console.WriteLine($"[DEBUG] Player found: {player != null}");
+                
+                if (player == null || player.Player == null || player.Player.PlayerExtra == null)
+                    return Ok(new { step = "step1_ok", message = "Player or PlayerExtra is null" });
+                
+                Console.WriteLine($"[DEBUG] PlayerExtra found: {player.Player.PlayerExtra != null}");
+                
+                var avatarItems = player.Player.PlayerExtra.AvatarItems ?? new List<string>();
+                Console.WriteLine($"[DEBUG] Found {avatarItems.Count} avatar items");
+                
+                var results = avatarItems.Select(i => new
                 {
                     customAvatarItemId = i,
                     itemId = i,
@@ -469,9 +492,139 @@ namespace Ember2023.Controllers
                     imageName = "",
                     rarity = "Common",
                     type = "Clothing"
-                }).ToList(),
-                TotalResults = player.Player.PlayerExtra.AvatarItems.Count
-            });
+                }).ToList();
+                
+                Console.WriteLine($"[DEBUG] Returning {avatarItems.Count} items");
+                return Ok(new
+                {
+                    Results = avatarItems.Select(i => new
+                    {
+                        customAvatarItemId = i,
+                        itemId = i,
+                        instanceId = i,
+                        name = "Custom Item",
+                        description = "",
+                        imageName = "",
+                        rarity = "Common",
+                        type = "Clothing"
+                    }).ToList(),
+                    TotalResults = avatarItems.Count
+                });
+}
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DEBUG] ERROR: {ex.Message}");
+                Console.WriteLine($"[DEBUG] Stack: {ex.StackTrace}");
+                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace, type = ex.GetType().FullName });
+            }
+        }
+
+        [HttpGet("/test/avatar-step2")]
+        public IActionResult TestAvatarStep2()
+        {
+            try
+            {
+                Console.WriteLine("[DEBUG] Step 2: Getting player ID");
+                var id = AuthStuff.GetPlayerId(Request);
+                Console.WriteLine($"[DEBUG] Player ID: {id}");
+                if (id == null) return Unauthorized();
+
+                Console.WriteLine("[DEBUG] Step 2: Finding player");
+                var player = PlayerDB.Players.FindById((long)id);
+                Console.WriteLine($"[DEBUG] Player found: {player != null}");
+
+                if (player == null || player.Player == null || player.Player.PlayerExtra == null)
+                    return Ok(new { step = "step2_ok", message = "Player or PlayerExtra is null" });
+
+                Console.WriteLine($"[DEBUG] PlayerExtra found: {player.Player.PlayerExtra != null}");
+
+                var avatarItems = player.Player.PlayerExtra.AvatarItems ?? new List<string>();
+                Console.WriteLine($"[DEBUG] Found {avatarItems.Count} avatar items");
+
+                var results = avatarItems.Select(i => new
+                {
+                    customAvatarItemId = i,
+                    itemId = i,
+                    instanceId = i,
+                    name = "Custom Item",
+                    description = "",
+                    imageName = "",
+                    rarity = "Common",
+                    type = "Clothing"
+                }).ToList();
+
+                Console.WriteLine($"[DEBUG] Returning {results.Count} items");
+                return Ok(new { step = "step2_ok", count = avatarItems.Count, items = results });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DEBUG] Step 2 error: {ex.Message}");
+                Console.WriteLine($"[DEBUG] Stack: {ex.StackTrace}");
+                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace, type = ex.GetType().FullName });
+            }
+        }
+
+        [HttpGet("/econ/customAvatarItems/v1/owned")]
+        [HttpGet("/api/customAvatarItems/v1/owned")]
+        public IActionResult GetOwnedCustomAvatarItems()
+        {
+            Console.WriteLine("[API] GetOwnedCustomAvatarItems: ENTRY POINT HIT");
+            try
+            {
+                Console.WriteLine("[API] GetOwnedCustomAvatarItems: Starting");
+                
+                var id = AuthStuff.GetPlayerId(Request);
+                Console.WriteLine($"[API] Player ID: {id}");
+
+                if (id == null)
+                    return Unauthorized();
+
+                Console.WriteLine($"[API] Player ID: {id}");
+
+                var player = PlayerDB.Players.FindById((long)id);
+                Console.WriteLine($"[API] Player found: {player != null}");
+
+                if (player == null || player.Player == null || player.Player.PlayerExtra == null)
+                    return Ok(new { Results = new List<object>(), TotalResults = 0 });
+
+                Console.WriteLine($"[API] PlayerExtra found: {player.Player.PlayerExtra != null}");
+
+                var avatarItems = player.Player.PlayerExtra.AvatarItems ?? new List<string>();
+                Console.WriteLine($"[API] Found {avatarItems.Count} avatar items");
+
+                var results = avatarItems.Select(i => new
+                {
+                    customAvatarItemId = i,
+                    itemId = i,
+                    instanceId = i,
+                    name = "Custom Item",
+                    description = "",
+                    imageName = "",
+                    rarity = "Common",
+                    type = "Clothing"
+                }).ToList();
+
+                Console.WriteLine($"[API] Returning {results.Count} items");
+                return Ok(new
+                {
+                    Results = results,
+                    TotalResults = avatarItems.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[API] GetOwnedCustomAvatarItems EXCEPTION CAUGHT: {ex.Message}");
+                Console.WriteLine($"[API] Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"[API] Exception type: {ex.GetType().FullName}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"[API] Inner exception: {ex.InnerException.Message}");
+                    Console.WriteLine($"[API] Inner stack trace: {ex.InnerException.StackTrace}");
+                }
+                var errorResponse = new { error = ex.Message, stackTrace = ex.StackTrace, type = ex.GetType().FullName };
+                Console.WriteLine($"[API] Returning 500 with error response: {System.Text.Json.JsonSerializer.Serialize(new { error = ex.Message, stackTrace = ex.StackTrace, type = ex.GetType().FullName })}");
+                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace, type = ex.GetType().FullName });
+            }
         }
         
         [HttpGet("/api/roomconsumables/v1/roomConsumable/room/{roomId}")]

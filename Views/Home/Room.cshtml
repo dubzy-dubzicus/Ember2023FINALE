@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Room";
+    Layout = "_Layout";
+}
+
+@section Scripts {
+<script src="~/js/room.js"></script>
+}
+
+<section class="room-header">
+    <div class="container">
+        <h1 id="roomTitle">Loading Room...</h1>
+        <div class="room-owner" id="roomOwner">Owner: <span id="roomOwnerName">-</span></div>
+    </div>
+</section>
+
+<div class="room-main">
+    <div class="container">
+        <div class="room-image-container">
+            <img id="roomImage" src="https://via.placeholder.com/800x400/333333/ffffff?text=Room+Preview" alt="Room Preview" class="room-image">
+        </div>
+        <div class="room-info">
+            <div class="room-tags" id="roomTags"></div>
+            <div class="room-actions">
+                <a href="#" class="btn btn-play">Play</a>
+                <a href="#" class="btn btn-meetup">Meetup</a>
+            </div>
+            <div class="room-description" id="roomDescription">
+                <p>Loading room description...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="room-sidebar">
+        <div class="sidebar-card">
+            <h3>Room Info</h3>
+            <p><strong>Room ID:</strong> <span id="roomIdDisplay">-</span></p>
+            <p><strong>Capacity:</strong> <span id="roomCapacity">-</span></p>
+            <p><strong>Platforms:</strong> <span id="roomPlatforms">PC, VR</span></p>
+        </div>
+        <div class="sidebar-card">
+            <h3>Players in Room</h3>
+            <div id="roomPlayers">
+                <p class="no-data">Loading players...</p>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Home";
+    Layout = "_Layout";
+}
+
+<section class="hero">
+    <div class="container">
+        <h1>Welcome to Ember Network</h1>
+        <p>Self-hosted Rec Room server powered by Ember. Connect, create, and explore with your friends.</p>
+        <div class="hero-actions">
+            <a href="/Search" class="btn btn-primary">Explore Rooms</a>
+            <a href="/Profile/dubzy" class="btn btn-secondary">View Profile</a>
+        </div>
+    </div>
+</section>
+
+<section class="featured-rooms">
+    <div class="container">
+        <h2 class="section-title">Featured Rooms</h2>
+        <div class="rooms-grid" id="roomsGrid">
+            <div class="empty-state">
+                <h2>Loading rooms...</h2>
+                <p class="no-data">Fetching room data from server...</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script src="~/js/home.js"></script>
+}

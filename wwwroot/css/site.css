@@ -1,0 +1,630 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #0f0f0f;
+    color: #fff;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.site-header {
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.site-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fff;
+    text-decoration: none;
+}
+
+.logo span {
+    color: #f57c00;
+}
+
+.main-nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.main-nav a {
+    color: #ccc;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.main-nav a:hover {
+    color: #fff;
+}
+
+.btn-login {
+    background: #f57c00;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-login:hover {
+    background: #e65100;
+}
+
+/* Main */
+main {
+    min-height: calc(100vh - 200px);
+}
+
+/* Footer */
+.site-footer {
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+    padding: 30px 0;
+    margin-top: 60px;
+}
+
+.site-footer .container {
+    text-align: center;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* Homepage */
+.hero {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    padding: 60px 0;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    background: linear-gradient(to right, #fff, #f57c00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #aaa;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #f57c00;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #e65100;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+.btn-secondary:hover {
+    background: #333;
+    border-color: #777;
+}
+
+.featured-rooms {
+    padding: 60px 0;
+}
+
+.section-title {
+    font-size: 1.75rem;
+    margin-bottom: 30px;
+    font-weight: 700;
+}
+
+.rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.room-card {
+    background: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #333;
+    transition: transform 0.2s;
+}
+
+.room-card:hover {
+    transform: translateY(-4px);
+}
+
+.room-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background: #333;
+}
+
+.room-card-content {
+    padding: 15px;
+}
+
+.room-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.room-card p {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.room-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* News */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 40px 0;
+}
+
+.news-card {
+    background: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #333;
+}
+
+.news-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #333;
+}
+
+.news-card-content {
+    padding: 20px;
+}
+
+.news-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
+
+.news-card p {
+    color: #aaa;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+}
+
+.news-card-date {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+/* Search */
+.search-header {
+    text-align: center;
+    padding: 50px 0;
+}
+
+.search-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.search-bar {
+    max-width: 600px;
+    margin: 20px auto;
+    display: flex;
+    gap: 10px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.search-bar button {
+    padding: 12px 24px;
+    background: #f57c00;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    background: #e65100;
+}
+
+.search-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    padding: 20px 0;
+    border-bottom: 1px solid #333;
+}
+
+.search-tab {
+    padding: 10px 20px;
+    background: transparent;
+    color: #888;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.search-tab.active {
+    color: #f57c00;
+    border-bottom-color: #f57c00;
+}
+
+.search-tab:hover {
+    color: #fff;
+}
+
+.search-results {
+    padding: 40px 0;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.result-card {
+    background: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #333;
+    padding: 15px;
+}
+
+.result-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.result-card p {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+/* Profile */
+.profile-header {
+    background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
+    padding: 60px 0;
+    text-align: center;
+    border-radius: 0 0 60px 60px;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #fff;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #f57c00;
+    border: 4px solid #fff;
+}
+
+.profile-header h1 {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.profile-header .username {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+}
+
+.profile-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    padding: 25px 0;
+    border-bottom: 1px solid #333;
+}
+
+.profile-tab {
+    padding: 12px 24px;
+    background: transparent;
+    color: #888;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.profile-tab.active {
+    color: #f57c00;
+    border-bottom-color: #f57c00;
+}
+
+.profile-tab:hover {
+    color: #fff;
+}
+
+.profile-content {
+    padding: 40px 0;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* Room page */
+.room-header {
+    background: #1a1a1a;
+    padding: 40px 0;
+    border-bottom: 1px solid #333;
+}
+
+.room-main {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 30px;
+    padding: 40px 0;
+}
+
+.room-image {
+    width: 100%;
+    height: 400px;
+    background: #333;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.room-info h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.room-info .room-owner {
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.room-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-play {
+    background: #f57c00;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-play:hover {
+    background: #e65100;
+}
+
+.btn-meetup {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-meetup:hover {
+    background: #333;
+    border-color: #777;
+}
+
+.room-tags {
+    margin-top: 15px;
+}
+
+.tag {
+    display: inline-block;
+    background: #333;
+    color: #f57c00;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+.room-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sidebar-card {
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+    padding: 20px;
+}
+
+.sidebar-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+/* Download */
+.download-hero {
+    background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
+    padding: 80px 0;
+    text-align: center;
+    border-radius: 0 0 80px 80px;
+}
+
+.download-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.download-hero p {
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.9);
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+
+.platforms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 25px;
+    padding: 60px 0;
+}
+
+.platform-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    text-align: center;
+    padding: 30px 20px;
+    border: 1px solid #333;
+    transition: transform 0.2s;
+}
+
+.platform-card:hover {
+    transform: translateY(-4px);
+    border-color: #f57c00;
+}
+
+.platform-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.platform-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
+
+.platform-card p {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #888;
+}
+
+.empty-state h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.no-data {
+    color: #666;
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+    .main-nav {
+        gap: 10px;
+    }
+    .main-nav a:not(.btn-login) {
+        font-size: 0.85rem;
+    }
+    .room-main {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Profile";
+    Layout = "_Layout";
+}
+
+@section Scripts {
+<script src="~/js/profile.js"></script>
+}
+
+<section class="profile-header">
+    <div class="container">
+        <div class="profile-avatar">👤</div>
+        <h1 id="profileUsername">@Model</h1>
+        <div class="username"><span id="usernameDisplay">@Model</span></div>
+        <div class="profile-stats">
+            <div class="stat">
+                <span class="stat-value" id="roomsCount">-</span>
+                <span class="stat-label">Rooms</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="inventionsCount">-</span>
+                <span class="stat-label">Inventions</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="friendsCount">-</span>
+                <span class="stat-label">Friends</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="profile-tabs">
+    <button class="profile-tab active" onclick="setProfileTab('feed', this)">Feed</button>
+    <button class="profile-tab" onclick="setProfileTab('photos', this)">Photos</button>
+    <button class="profile-tab" onclick="setProfileTab('rooms', this)">Rooms</button>
+    <button class="profile-tab" onclick="setProfileTab('events', this)">Events</button>
+</div>
+
+<section class="profile-content">
+    <div class="container">
+        <div id="profileContent">
+            <div class="empty-state">
+                <h2>Loading profile...</h2>
+                <p class="no-data">Fetching profile data...</p>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Search";
+    Layout = "_Layout";
+}
+
+@section Scripts {
+<script src="~/js/search.js"></script>
+}
+
+<section class="search-header">
+    <div class="container">
+        <h1>Search Ember Network</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search players, rooms, inventions...">
+            <button onclick="search()">Search</button>
+        </div>
+    </div>
+</section>
+
+<div class="search-tabs">
+    <button class="search-tab active" onclick="setTab('people', this)">People</button>
+    <button class="search-tab" onclick="setTab('rooms', this)">Rooms</button>
+    <button class="search-tab" onclick="setTab('events', this)">Events</button>
+    <button class="search-tab" onclick="setTab('inventions', this)">Inventions</button>
+</div>
+
+<section class="search-results">
+    <div class="container">
+        <div class="results-grid" id="resultsGrid">
+            <div class="empty-state">
+                <h2>Search results</h2>
+                <p class="no-data">Enter a search term to find people, rooms, events, and inventions.</p>
+            </div>
+        </div>
+    </div>
+</section>

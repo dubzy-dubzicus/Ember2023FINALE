@@ -51,6 +51,9 @@ namespace Ember2023
             {
                 o.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddRazorPages();
+            builder.Services.AddHttpClient();
 
             builder.Services.AddResponseCompression(options =>
             {
@@ -80,8 +83,27 @@ namespace Ember2023
             app.UseWebSockets();
             
             app.UseResponseCompression();
-            
+            app.UseStaticFiles(); // Serve wwwroot (css, js)
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Program.dataDir, "CDN", "room")),
+                RequestPath = "/cdn/room",
+                ServeUnknownFileTypes = true,
+DefaultContentType = "application/octet-stream"
+            });
+
             app.UseRouting();
+            // Content negotiation: browser requests to / get the website, API clients get JSON config
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path == "/" &&
+                    context.Request.Headers["Accept"].ToString().Contains("text/html"))
+                {
+                    context.Response.Redirect("/Home/Index");
+                    return;
+                }
+                await next();
+            });
             
             app.UseAuthorization();
 
@@ -95,6 +117,11 @@ namespace Ember2023
             {
                 var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
                 var path = context.Request.Path.Value ?? "";
+                var method = context.Request.Method;
+                
+                // Log ALL requests for debugging
+                Console.WriteLine($"[REQ] {method} {path} from {ip}");
+
                 bool allowRequest = true;
 
                 lock (rateLimitLock)
@@ -133,6 +160,10 @@ namespace Ember2023
             });
             
             app.MapControllers();
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapRazorPages();
             
             app.UseStaticFiles(new StaticFileOptions
             {
