@@ -1,0 +1,84 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="10.0.5" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
+        <PackageReference Include="WebSocketSharp" Version="1.0.3-rc11" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="ns.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="ns.rec.net.pem">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="ns.rec.net-key.pem">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="ns.rec.net.pfx">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="_wildcard.rec.net.pfx">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="_wildcard.rec.net.pem">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="_wildcard.rec.net-key.pem">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="cert.pem">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="key.pem">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="wwwroot\DefaultProfileImage.png" />
+      <None Include="wwwroot\other\deviceauth.html">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="1000.crt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="root-ca.key">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="client.full.pfx">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="rec.net.cert.pem">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="rec.net.key.pem">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="wwwroot\config\1b057e6e-979d-4f30-8856-a386f77c90da">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\config\config.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="ServerData\Rooms\test\info.json" />
+      <_ContentIncludedByDefault Remove="ServerData\Rooms\TechnologyShop\info.json" />
+      <_ContentIncludedByDefault Remove="ServerData\Accounts\3\Avatar.json" />
+      <_ContentIncludedByDefault Remove="ServerData\Accounts\3\Outfits.json" />
+      <_ContentIncludedByDefault Remove="ServerData\Accounts\3\PlayerSettings.json" />
+      <_ContentIncludedByDefault Remove="ServerData\Accounts\3\user.json" />
+    </ItemGroup>
+
+</Project>

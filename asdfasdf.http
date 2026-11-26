@@ -1,0 +1,6 @@
+@asdfasdf_HostAddress = http://localhost:80
+
+GET {{asdfasdf_HostAddress}}/
+Accept: application/json
+
+###

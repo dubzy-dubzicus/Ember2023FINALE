@@ -1,220 +1,197 @@
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using Ember2023;
-using Microsoft.AspNetCore.ResponseCompression;
-using Ember2023.Classes;
-using Ember2023.Classes.DBs;
-using Ember2023.Classes.DBs.DBClasses;
-using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.AspNetCore.Hosting;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
+using asdfasdf;
+using asdfasdf.APIs;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
+using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
-namespace Ember2023
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<JsonOptions>(options =>
 {
-    public class Program
+    options.SerializerOptions.PropertyNamingPolicy = null;
+});
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+
+builder.Services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme).AddCertificate("x509", options =>
+{
+    options.RevocationMode = X509RevocationMode.NoCheck;
+});
+
+builder.WebHost.ConfigureKestrel((context, options) =>
+{
+    options.ListenAnyIP(443, listenOptions =>
     {
-        public static string dataDir = Path.Combine(Environment.CurrentDirectory, "Data");
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
+        listenOptions.UseHttps();
+    });
 
-        public static async Task Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+    
+    options.ConfigureHttpsDefaults(h =>
+    {
+        h.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+        h.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
+    });
+});
 
-            if (!Directory.Exists(dataDir))
-            {
-                Console.WriteLine($"Setting up data directory...");
+builder.Services.AddAuthorization();
 
-                string[] foldersToCreate = new[]
-                {
-                    dataDir,
-                    Path.Combine(dataDir, "Images"),
-                    Path.Combine(dataDir, "Images", "PlayerImages"),
-                    Path.Combine(dataDir, "Images", "PolaroidImages"),
-                    Path.Combine(dataDir, "CDN", "DataBlobs"),
-                    Path.Combine(dataDir, "CDN", "InventionBlobs"),
-                    Path.Combine(dataDir, "CDN", "RoomBlobs"),
-                    Path.Combine(dataDir, "Imports"),
-                };
+builder.Services.AddHttpLogging();
+builder.Services.AddLogging();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 
-                foreach (var folder in foldersToCreate)
-                {
-                    Directory.CreateDirectory(folder);
-                }
+var app = builder.Build();
 
-                Console.WriteLine($"Set up Data directory at {dataDir}");
-            }
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    // app.UseRequestResponseLogging();
+}
 
-            builder.Services.AddControllers().AddJsonOptions(o =>
-            {
-                o.JsonSerializerOptions.PropertyNamingPolicy = null;
-            });
-            builder.Services.AddControllersWithViews();
-            builder.Services.AddRazorPages();
-            builder.Services.AddHttpClient();
+WebSocketOptions wsOptions = new()
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(1)
+};
 
-            builder.Services.AddResponseCompression(options =>
-            {
-                options.EnableForHttps = true;
-                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "application/json", "image/png", "image/jpeg" }
-                );
-            });
+app.UseHttpLogging();
+app.UseStaticFiles();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseWebSockets(wsOptions);
 
-            builder.Services.AddHttpLogging(options =>
-            {
-                options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.None;
-            });
+CreateFolder("ServerData");
+CreateFolder("ServerData/Accounts");
+CreateFolder("ServerData/CachedAccounts");
+CreateFolder("ServerData/BugReports");
+CreateFolder("ServerData/Rooms");
 
-            builder.WebHost.ConfigureKestrel(options =>
-            {
-                options.Limits.MaxConcurrentConnections = 500;
-                options.Limits.MaxRequestBodySize = 10 * 1024 * 1024;
-                options.Limits.MinResponseDataRate = null;
-                options.Limits.MinRequestBodyDataRate = null;
-            });
+CreateFolder("ServerData/Accounts/1");
+CreateFolder("ServerData/Accounts/2");
 
-            var app = builder.Build();
-            
-            app.UseHttpLogging();
-            
-            app.UseWebSockets();
-            
-            app.UseResponseCompression();
-            app.UseStaticFiles(); // Serve wwwroot (css, js)
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Program.dataDir, "CDN", "room")),
-                RequestPath = "/cdn/room",
-                ServeUnknownFileTypes = true,
-DefaultContentType = "application/octet-stream"
-            });
+if (!File.Exists("ServerData/Accounts/1/user.json"))
+{
+    BulkAccount tAccount = new()
+    {
+        AvailableUsernameChanges = 1,
+        Email = "coach@coach.com",
+        Birthday = DateTime.MinValue,
+        IsFakeJuniorBirthday = false,
+        accountId = 1,
+        username = "Coach",
+        displayName = "Coach",
+        displayEmoji = "",
+        profileImage = "DefaultProfileImage.png",
+        bannerImage = "DefaultProfileImage.png",
+        isJunior = false,
+        platforms = PlatformType.All,
+        personalPronouns = PersonalPronouns.None,
+        identityFlags = IdentityFlags.None,
+        createdAt = DateTime.UtcNow,
+        isMetaPlatformBlocked = false
+    };
+    
+    File.WriteAllText("ServerData/Accounts/1/user.json", JsonSerializer.Serialize(tAccount));
+}
 
-            app.UseRouting();
-            // Content negotiation: browser requests to / get the website, API clients get JSON config
-            app.Use(async (context, next) =>
-            {
-                if (context.Request.Path == "/" &&
-                    context.Request.Headers["Accept"].ToString().Contains("text/html"))
-                {
-                    context.Response.Redirect("/Home/Index");
-                    return;
-                }
-                await next();
-            });
-            
-            app.UseAuthorization();
+if (!File.Exists("ServerData/Accounts/2/user.json"))
+{
+    BulkAccount tAccount = new()
+    {
+        AvailableUsernameChanges = 1,
+        Email = "email@email.com",
+        Birthday = DateTime.MinValue,
+        IsFakeJuniorBirthday = false,
+        accountId = 0,
+        username = Environment.UserName,
+        displayName = Environment.UserName,
+        displayEmoji = "",
+        profileImage = "DefaultProfileImage.png",
+        bannerImage = "DefaultProfileImage.png",
+        isJunior = false,
+        platforms = PlatformType.All,
+        personalPronouns = PersonalPronouns.None,
+        identityFlags = IdentityFlags.None,
+        createdAt = DateTime.UtcNow,
+        isMetaPlatformBlocked = false
+    };
+    
+    File.WriteAllText("ServerData/Accounts/2/user.json", JsonSerializer.Serialize(tAccount));
+}
 
-            // Rate limiting middleware
-            var rateLimitLock = new object();
-            var rateLimitClients = new Dictionary<string, (List<DateTime> LastMinute, List<DateTime> LastHour)>();
-            const int MaxPerMinute = 600;
-            const int MaxPerHour = 36000;
+if (!File.Exists("ServerData/Accounts/2/PlayerSettings.json"))
+{
+    File.Copy("DefaultPlayerSettings.json", "ServerData/Accounts/2/PlayerSettings.json");
+}
 
-            app.Use(async (context, next) =>
-            {
-                var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-                var path = context.Request.Path.Value ?? "";
-                var method = context.Request.Method;
-                
-                // Log ALL requests for debugging
-                Console.WriteLine($"[REQ] {method} {path} from {ip}");
+if (!File.Exists("ServerData/Accounts/2/avoidjuniors"))
+{
+    File.WriteAllText("ServerData/Accounts/2/avoidjuniors", "false");
+}
 
-                bool allowRequest = true;
+if (!File.Exists("ServerData/Accounts/2/Avatar.json"))
+{
+    File.Copy("DefaultAvatar.json", "ServerData/Accounts/2/Avatar.json");
+}
 
-                lock (rateLimitLock)
-                {
-                    if (!rateLimitClients.TryGetValue(ip, out var entry))
-                    {
-                        entry = (new List<DateTime>(), new List<DateTime>());
-                        rateLimitClients[ip] = entry;
-                    }
+if (!File.Exists("ServerData/Config.json"))
+{
+    ServerConfig.config = new()
+    {
+        PhotonRegion = string.Empty,
+        PhotonInstanceId = string.Empty
+    };
+    
+    File.WriteAllText("ServerData/Config.json", JsonSerializer.Serialize(ServerConfig.config));
+}
+else
+{
+    ServerConfig.config = JsonSerializer.Deserialize<ServerConfig>(File.ReadAllText("ServerData/Config.json"));
+}
 
-                    var now = DateTime.UtcNow;
-                    entry.LastMinute.RemoveAll(t => now - t > TimeSpan.FromMinutes(1));
-                    entry.LastHour.RemoveAll(t => now - t > TimeSpan.FromHours(1));
+NameServer.Init(app);
+API.Init(app);
+Auth.Init(app);
+Accounts.Init(app);
+Matchmaking.Init(app);
+Commerce.Init(app);
+Moderation.Init(app);
+Studio.Init(app);
+Notify.Init(app);
+Rooms.Init(app);
+Data.Init(app);
+CDN.Init(app);
+DataCollection.Init(app);
+Econ.Init(app);
+PlayerSettingsAPI.Init(app);
+Clubs.Init(app);
+AI.Init(app);
+PlatformNotifications.Init(app);
+Chat.Init(app);
+BugReporting.Init(app);
+Storage.Init(app);
+Images.Init(app);
+Amplitude.Init(app);
 
-                    if (entry.LastMinute.Count >= MaxPerMinute || entry.LastHour.Count >= MaxPerHour)
-                    {
-                        allowRequest = false;
-                    }
-                    else
-                    {
-                        entry.LastMinute.Add(now);
-                        entry.LastHour.Add(now);
-                    }
-                }
+app.MapGet("/generate_204", Results.NoContent);
 
-                if (!allowRequest)
-                {
-                    context.Response.StatusCode = 429;
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync("{\"error\":\"rate_limit_exceeded\",\"message\":\"Too many requests\"}");
-                    return;
-                }
+app.Run();
 
-                Ember2023.Controllers.HealthController.IncrementRequestCount(path);
-                await next();
-            });
-            
-            app.MapControllers();
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-            app.MapRazorPages();
-            
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Program.dataDir, "CDN", "room")),
-                RequestPath = "/cdn/room",
-                ServeUnknownFileTypes = true,
-                DefaultContentType = "application/octet-stream"
-            });
 
-            // Load and register loading screen URLs
-            string rewrittenLoadscreenJson = null;
-            try
-            {
-                var loadingscreenPath = Path.Combine(Program.dataDir, "Imports", "loadingscreen.json");
-                if (System.IO.File.Exists(loadingscreenPath))
-                {
-                    var loadingscreenJson = await System.IO.File.ReadAllTextAsync(loadingscreenPath);
-                    rewrittenLoadscreenJson = Classes.LoadingScreenImageService.RewriteConfiguration(loadingscreenJson);
-                    var rewrittenPath = Path.Combine(Program.dataDir, "Imports", "loadingscreen.rewritten.json");
-                    await System.IO.File.WriteAllTextAsync(rewrittenPath, rewrittenLoadscreenJson);
-                    Console.WriteLine("[LoadingScreenImageService] Registered loading screen URLs and saved rewritten config");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[LoadingScreenImageService] Failed to load config: {ex.Message}");
-            }
-
-            // Mark all RRO rooms as cloneable/templates
-            try
-            {
-                RoomDB.MarkRROsAsCloneable();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[RoomDB] Failed to mark RROs as cloneable: {ex.Message}");
-            }
-
-            // Warm cache with static data
-            try
-            {
-                CacheService.WarmCache();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Cache Warmer] Failed: {ex.Message}");
-            }
-                        
-            Task.Run(() => Cloudflare.StartCloudflared());
-            
-            app.Run("http://localhost:2059");
-        }
+static void CreateFolder(string dir)
+{
+    if (!Directory.Exists(dir))
+    {
+        Directory.CreateDirectory(dir);
     }
 }
