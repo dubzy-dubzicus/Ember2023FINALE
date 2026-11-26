@@ -1,0 +1,78 @@
+[
+  {
+    "Key" : "SplitTestAssignedSegments",
+    "Value" : "1|{\"SplitTesting+RoomRecommendations_2020_05_06\":\"Off\",\"SplitTesting+RoomRecommendationsType_2020_08_14\":\"Aug14MinVisitors35000\",\"SplitTesting+Promo_Pack_2020_05_27\":\"NoPurchaseReminder\",\"SplitTesting+GottaGoFastNUX_2020_09_04\":\"Off\",\"SplitTesting+ProfileOnClick_2021_04_30\":\"Off\",\"SplitTesting+PlayHighlightCardSizes_2021_05_04\":\"On\",\"SplitTesting+IOSLowHalfResolutionTextures_2021_05_14\":\"On\",\"SplitTesting+NotificationPermissionsSkipButton_2021_06_25\":\"HideSkipButton\",\"SplitTesting+NotificationPermissionsContextualPrompts_2021_06_25\":\"Control\"}"
+  },
+  {
+    "Key" : "Recroom.AccountCreation.HasStarted",
+    "Value" : "False"
+  },
+  {
+    "Key" : "PlayerSessionCount",
+    "Value" : "0"
+  },
+  {
+    "Key" : "Recroom.AccountCreation.HasChosenUsername",
+    "Value" : "False"
+  },
+  {
+    "Key" : "Recroom.AccountCreation.HasCreatedPassword",
+    "Value" : "False"
+  },
+  {
+    "Key" : "Recroom.AccountCreation.HasFinished",
+    "Value" : "False"
+  },
+  {
+    "Key" : "BACKPACK_FAVORITE_TOOL",
+    "Value" : "-1"
+  },
+  {
+    "Key" : "MakerPen_SnappingMode",
+    "Value" : "0"
+  },
+  {
+    "Key" : "HAS_OPENED_WATCH_MENU_BEFORE",
+    "Value" : "False"
+  },
+  {
+    "Key" : "SCREENS_MOUSE_SENSITIVITY",
+    "Value" : "12"
+  },
+  {
+    "Key" : "QualitySettings_Desktop_VRMissing",
+    "Value" : "3"
+  },
+  {
+    "Key" : "Recroom.ChallengeMap",
+    "Value" : "1"
+  },
+  {
+    "Key" : "TUTORIAL_COMPLETE_MASK",
+    "Value" : "57"
+  },
+  {
+    "Key" : "SCREENS_HEAD_BOB",
+    "Value" : "0"
+  },
+  {
+    "Key" : "DisablePersonalBubbleForFriends",
+    "Value" : "True"
+  },
+  {
+    "Key" : "VoiceChat",
+    "Value" : "0"
+  },
+  {
+    "Key" : "IgnoreBuffer",
+    "Value" : "1"
+  },
+  {
+    "Key" : "USER_TRACKING",
+    "Value" : "1"
+  },
+  {
+    "Key" : "HasCheckedForPlatformReferrers",
+    "Value" : "True"
+  }
+]

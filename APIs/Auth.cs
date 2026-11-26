@@ -100,6 +100,16 @@ public static class Auth
                 });
             }
 
+            string nonce = request.Headers["X-EMBER-Nonce"].ToString();
+            if (IsSentinelValue(platformId) || (!string.IsNullOrWhiteSpace(nonce) && IsSentinelValue(nonce)))
+            {
+                return Results.BadRequest(new
+                {
+                    error = "invalid_grant",
+                    error_description = "sentinel identity/nonce is not accepted"
+                });
+            }
+
             app.Logger.LogInformation($"(Auth) token grant={grant_type} client={client_id ?? ""} platform={platformId}");
 
             TokenResponse token = BuildTokenResponse();
@@ -114,10 +124,15 @@ public static class Auth
         app.MapPost("/auth/connect/token", HandleToken).DisableAntiforgery();
         app.MapPost("/connect/token", HandleToken).DisableAntiforgery();
 
-        app.MapGet("/cachedlogin/forplatformid/0/{steamId}", (string steamId, HttpRequest request) =>
+        app.MapGet("/cachedlogin/forplatformid/0/{steamId}", (string steamId) =>
         {
+            if (IsSentinelValue(steamId))
+            {
+                return Results.BadRequest(new { error = "invalid_request", error_description = "sentinel identity is not accepted" });
+            }
+
             CachedAccount cachedAccount = EnsureCachedAccount(steamId);
-            return new List<CachedAccount> { cachedAccount };
+            return Results.Ok(new List<CachedAccount> { cachedAccount });
         });
 
         app.MapPost("/cachedlogin/forplatformids", () =>
@@ -184,6 +199,29 @@ public static class Auth
         }).DisableAntiforgery();
     }
 
+    private static bool IsSentinelValue(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return true;
+        }
+
+        string normalized = value.Trim();
+
+        if (long.TryParse(normalized, out long numeric) && numeric <= 0)
+        {
+            return true;
+        }
+
+        string[] sentinels =
+        {
+            "0", "-1", "null", "none", "undefined", "unknown", "stub",
+            "sentinel", "nometa", "no_meta", "no-meta", "fake", "guest"
+        };
+
+        return sentinels.Contains(normalized, StringComparer.OrdinalIgnoreCase);
+    }
+
     private static TokenResponse BuildTokenResponse()
     {
         return new TokenResponse
@@ -220,6 +258,11 @@ public static class Auth
 
     private static CachedAccount EnsureCachedAccount(string platformId)
     {
+        if (IsSentinelValue(platformId))
+        {
+            throw new ArgumentException("Sentinel platform identity is not accepted.", nameof(platformId));
+        }
+
         lock (AccountLock)
         {
             Directory.CreateDirectory("ServerData/CachedAccounts");
@@ -253,7 +296,8 @@ public static class Auth
             CachedAccount cached = JsonSerializer.Deserialize<CachedAccount>(File.ReadAllText(path))
                 ?? throw new InvalidOperationException("Cached account file is empty: " + path);
 
-            EnsureAccountFiles(cached.AccountId, cached.PlatformId ?? platformId);
+            string accountPlatform = IsSentinelValue(cached.PlatformId ?? string.Empty) ? platformId : cached.PlatformId!;
+            EnsureAccountFiles(cached.AccountId, accountPlatform);
             return cached;
         }
     }

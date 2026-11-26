@@ -177,3 +177,8 @@ C:\Users\dubzy\Documents\GitHub\Ember2023FINALE\bin\Release\net8.0\ServerData\Ch
 C:\Users\dubzy\Documents\GitHub\Ember2023FINALE\bin\Release\net8.0\ServerData\Config.json
 C:\Users\dubzy\Documents\GitHub\Ember2023FINALE\bin\Release\net8.0\ServerData\RoomFilters.json
 C:\Users\dubzy\Documents\GitHub\Ember2023FINALE\bin\Release\net8.0\ServerData\RoomNamesToIds.json
+C:\Users\dubzy\Documents\GitHub\Ember2023FINALE\bin\Release\net8.0\ServerData\Accounts\3\Avatar.json
+C:\Users\dubzy\Documents\GitHub\Ember2023FINALE\bin\Release\net8.0\ServerData\Accounts\3\Outfits.json
+C:\Users\dubzy\Documents\GitHub\Ember2023FINALE\bin\Release\net8.0\ServerData\Accounts\3\PlayerSettings.json
+C:\Users\dubzy\Documents\GitHub\Ember2023FINALE\bin\Release\net8.0\ServerData\Accounts\3\user.json
+C:\Users\dubzy\Documents\GitHub\Ember2023FINALE\bin\Release\net8.0\ServerData\CachedAccounts\76561198706310245.json

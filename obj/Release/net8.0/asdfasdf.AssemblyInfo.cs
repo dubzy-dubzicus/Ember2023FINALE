@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Gallium")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+40da4c35d7390768ab98462ab94dfe33ae2ffe91")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b1b08d5562e63a787f113f922aa4b322d62ae679")]
 [assembly: System.Reflection.AssemblyProductAttribute("Gallium")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Gallium")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
