@@ -1,0 +1,98 @@
+{
+  "RoomId": 57,
+  "Name": "Calibration",
+  "Description": "PSVR room calibration",
+  "ImageName": "png",
+  "WarningMask": 0,
+  "CustomWarning": null,
+  "CreatorAccountId": 0,
+  "State": 0,
+  "Accessibility": 1,
+  "PublishState": 0,
+  "SupportsLevelVoting": false,
+  "IsRRO": true,
+  "IsRecRoomApproved": false,
+  "ExcludeFromLists": false,
+  "ExcludeFromSearch": false,
+  "SupportsScreens": true,
+  "SupportsWalkVR": true,
+  "SupportsTeleportVR": true,
+  "SupportsVRLow": true,
+  "SupportsQuest2": true,
+  "SupportsMobile": true,
+  "SupportsJuniors": true,
+  "MinLevel": 0,
+  "AgeRating": 2,
+  "CreatedAt": "2026-03-11T06:48:51.318650Z",
+  "PublishedAt": "2026-03-11T06:48:51.318650Z",
+  "BecameRRStudioRoomAt": null,
+  "Stats": {
+    "CheerCount": 0,
+    "FavoriteCount": 0,
+    "VisitorCount": 0,
+    "VisitCount": 0
+  },
+  "RankingContext": null,
+  "IsDorm": false,
+  "IsPlacePlay": false,
+  "MaxPlayerCalculationMode": 0,
+  "MaxPlayers": 1,
+  "CloningAllowed": false,
+  "DisableMicAutoMute": false,
+  "DisableRoomComments": false,
+  "EncryptVoiceChat": false,
+  "ToxmodEnabled": true,
+  "LoadScreenLocked": false,
+  "UgcVersion": 1,
+  "PersistenceVersion": 0,
+  "UgcSubVersion": null,
+  "MinUgcSubVersion": null,
+  "AutoLocalizeRoom": false,
+  "LocalizationContext": {
+    "TargetLocale": null,
+    "Scope": null,
+    "LocalizedFields": ["Description", "CustomWarning"]
+  },
+  "IsDeveloperOwned": true,
+  "RankedEntityId": "2",
+  "SubRooms": [
+    {
+      "SubRoomId": 57,
+      "RoomId": 57,
+      "CreatorAccountId": 0,
+      "UnitySceneId": "f5fbd9c9-e853-4036-9d48-5f68e861af04",
+      "Name": "Home",
+      "LastModeratedSaveModerationState": 0,
+      "IsSandbox": false,
+      "MaxPlayers": 1,
+      "Accessibility": 1,
+      "ShouldAutoStageSaves": true,
+      "StagedSubRoomDataSaveId": null
+    }
+  ],
+  "Roles": [
+    {
+      "AccountId": 0,
+      "Role": 255,
+      "LastChangedByAccountId": null,
+      "InvitedRole": 0
+    },
+    {
+      "AccountId": 2,
+      "Role": 30,
+      "LastChangedByAccountId": null,
+      "InvitedRole": 0
+    }
+  ],
+  "IsJuniorCreated": false,
+  "Tags": [
+    {
+      "Tag": "rro",
+      "Type": 2
+    }
+  ],
+  "PromoImages": [],
+  "PromoExternalContent": [],
+  "LoadScreens": [],
+  "RestrictedCircuitsAllowListNames": []
+}

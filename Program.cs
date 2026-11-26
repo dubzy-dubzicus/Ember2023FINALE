@@ -1,11 +1,7 @@
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using asdfasdf;
 using asdfasdf.APIs;
-using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.Server.Kestrel.Https;
 using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,34 +11,19 @@ builder.Services.Configure<JsonOptions>(options =>
     options.SerializerOptions.PropertyNamingPolicy = null;
 });
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
-builder.Services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme).AddCertificate("x509", options =>
-{
-    options.RevocationMode = X509RevocationMode.NoCheck;
-});
+// Add services to the container. Tailscale Funnel terminates TLS and forwards
+// plain HTTP to this backend, so Kestrel only listens on 127.0.0.1:2059.
+builder.Services.AddAuthorization();
 
 builder.WebHost.ConfigureKestrel((context, options) =>
 {
-    options.ListenAnyIP(443, listenOptions =>
+    options.ListenLocalhost(2059, listenOptions =>
     {
-        listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
-        listenOptions.UseHttps();
-    });
-
-    
-    options.ConfigureHttpsDefaults(h =>
-    {
-        h.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
-        h.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
+        listenOptions.Protocols = HttpProtocols.Http1;
     });
 });
 
-builder.Services.AddAuthorization();
-
-builder.Services.AddHttpLogging();
+builder.Services.AddHttpLogging(logging => { });
 builder.Services.AddLogging();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -53,7 +34,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
     // app.UseRequestResponseLogging();
@@ -66,7 +46,6 @@ WebSocketOptions wsOptions = new()
 
 app.UseHttpLogging();
 app.UseStaticFiles();
-app.UseAuthentication();
 app.UseAuthorization();
 app.UseWebSockets(wsOptions);
 
@@ -185,6 +164,7 @@ Amplitude.Init(app);
 
 app.MapGet("/generate_204", Results.NoContent);
 
+app.Logger.LogInformation("Gallium/GalNet backend ready on http://127.0.0.1:2059 (public entry https://ember.tail298318.ts.net)");
 app.Run();
 
 

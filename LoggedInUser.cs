@@ -12,6 +12,7 @@ public class LoggedInUser
     public BulkAccount account { get; set; }
     public int currentStatusVisibility { get; set; }
     public int deviceClass { get; set; }
+    public string appVersion { get; set; } = "20230405";
     public Heartbeat heartbeat { get; set; }
     public RoomInstance currentInstance { get; set; }
     public List<PlayerSetting> ps { get; set; }
@@ -20,7 +21,7 @@ public class LoggedInUser
     {
         heartbeat = new()
         {
-            appVersion = "20230302",
+            appVersion = string.IsNullOrWhiteSpace(appVersion) ? "20230405" : appVersion,
             deviceClass = deviceClass,
             errorCode = 0,
             isOnline = true,

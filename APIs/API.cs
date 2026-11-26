@@ -167,7 +167,7 @@ public static class API
 
         app.MapGet("/api/versioncheck/v4", (string v, int p) =>
         {
-            app.Logger.LogInformation("VersionCheck: " + v + " " + p);
+            app.Logger.LogInformation("VersionCheck: " + v + " p=" + p + " (GalNet accepts 2023-04 builds)");
 
             VersionCheckObject ver = new()
             {

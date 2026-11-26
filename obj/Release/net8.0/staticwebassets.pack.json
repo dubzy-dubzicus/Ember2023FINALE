@@ -1,0 +1,185 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_AR.png",
+      "PackagePath": "staticwebassets\\Activity_Image_AR.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Bowling.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Bowling.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Charades_InkSpace.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Charades_InkSpace.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Charades_legacy.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Charades_legacy.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Cyberjunk.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Cyberjunk.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Discgolf_Lake.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Discgolf_Lake.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Discgolf_Propulsion.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Discgolf_Propulsion.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Dodgeball.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Dodgeball.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Dorm.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Dorm.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Lasertag_Arena.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Lasertag_Arena.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Lounge.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Lounge.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Maker room.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Maker room.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Orientation.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Orientation.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Paddleball.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Paddleball.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Paintball_Clearcut.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Paintball_Clearcut.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Paintball_DriveIn.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Paintball_DriveIn.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Paintball_Homestead.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Paintball_Homestead.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Paintball_Quarry.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Paintball_Quarry.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Paintball_River.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Paintball_River.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Paintball_Spillway.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Paintball_Spillway.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Park.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Park.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Quest_CBM.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Quest_CBM.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Quest_CCC.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Quest_CCC.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Quest_Golden_Trophy.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Quest_Golden_Trophy.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Quest_ILS.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Quest_ILS.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Quest_Jumbotron.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Quest_Jumbotron.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_RecRally_PioneerPeak.png",
+      "PackagePath": "staticwebassets\\Activity_Image_RecRally_PioneerPeak.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_RecRoyale.png",
+      "PackagePath": "staticwebassets\\Activity_Image_RecRoyale.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_Soccer.png",
+      "PackagePath": "staticwebassets\\Activity_Image_Soccer.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_StuntRunner.png",
+      "PackagePath": "staticwebassets\\Activity_Image_StuntRunner.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\Activity_Image_performance hall.png",
+      "PackagePath": "staticwebassets\\Activity_Image_performance hall.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\DefaultProfileImage.png",
+      "PackagePath": "staticwebassets\\DefaultProfileImage.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\RecCenter.jpg",
+      "PackagePath": "staticwebassets\\RecCenter.jpg"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\config\\1b057e6e-979d-4f30-8856-a386f77c90da",
+      "PackagePath": "staticwebassets\\config"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\config\\RRPlusConfig_v3.json",
+      "PackagePath": "staticwebassets\\config\\RRPlusConfig_v3.json"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\config\\config.json",
+      "PackagePath": "staticwebassets\\config\\config.json"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\lemres.png",
+      "PackagePath": "staticwebassets\\lemres.png"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\other\\deviceauth.html",
+      "PackagePath": "staticwebassets\\other\\deviceauth.html"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\other\\deviceauth.html.bak-20261125-212825-remaster-wireup",
+      "PackagePath": "staticwebassets\\other\\deviceauth.html.bak-20261125-212825-remaster-wireup"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\room\\2-756bf8f1-ffce-44db-bd9f-c6da457bb9ce.room",
+      "PackagePath": "staticwebassets\\room\\2-756bf8f1-ffce-44db-bd9f-c6da457bb9ce.room"
+    },
+    {
+      "Id": "C:\\Users\\dubzy\\Documents\\GitHub\\Ember2023FINALE\\wwwroot\\video\\oobe-intro.mp4",
+      "PackagePath": "staticwebassets\\video\\oobe-intro.mp4"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.Gallium.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.build.Gallium.props",
+      "PackagePath": "build\\Gallium.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.Gallium.props",
+      "PackagePath": "buildMultiTargeting\\Gallium.props"
+    },
+    {
+      "Id": "obj\\Release\\net8.0\\staticwebassets\\msbuild.buildTransitive.Gallium.props",
+      "PackagePath": "buildTransitive\\Gallium.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

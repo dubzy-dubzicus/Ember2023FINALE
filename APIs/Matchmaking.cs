@@ -59,18 +59,27 @@ public static class Matchmaking
             return qosEndpoints;
         });
 
-        app.MapPost("/player/heartbeat", (HttpRequest request) =>
+        app.MapPost("/player/heartbeat", async (HttpRequest request) =>
         {
+            var form = await request.ReadFormAsync();
+            string? reportedVersion = form["appVersion"].FirstOrDefault();
+
             foreach (var user in Auth.currentUsers)
             {
                 if (user.token == request.Headers.Authorization[0])
                 {
+                    if (!string.IsNullOrWhiteSpace(reportedVersion))
+                    {
+                        user.appVersion = reportedVersion;
+                    }
+
+                    user.UpdateHeartbeat();
                     return user.heartbeat;
                 }
             }
 
             return null;
-        });
+        }).DisableAntiforgery();
 
         app.MapPut("/player/statusvisibility", ([FromForm] string statusVisibility, HttpRequest request) =>
         {
@@ -412,15 +421,12 @@ public static class Matchmaking
             
         }).DisableAntiforgery();
 
-        app.MapGet("/rooms/requiring/rrplus", () =>
-        {
-            return "[]";
-        });
+        app.MapGet("/rooms/requiring/rrplus", () => "[]");
+        app.MapGet("/rooms/requiring/developer", () => "[]");
 
-        app.MapGet("/rooms/requiring/developer", () =>
-        {
-            return "[]";
-        });
+        // Some 2023 clients prefix these with /match.
+        app.MapGet("/match/rooms/requiring/rrplus", () => "[]");
+        app.MapGet("/match/rooms/requiring/developer", () => "[]");
 
         app.MapPost("/roominstance/{instance}/reportjoinresult", () =>
         {

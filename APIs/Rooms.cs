@@ -30,6 +30,28 @@ public static class Rooms
         File.WriteAllText("ServerData/RoomNamesToIds.json", JsonSerializer.Serialize(newRoomNamesToIds));
     }
     
+    // Every room read must carry the beta tag; the 2023 client uses it to
+    // unlock Maker Pen tools/skins. Keep it idempotent for older room files.
+    private static Room LoadRoom(string path)
+    {
+        Room room = JsonSerializer.Deserialize<Room>(File.ReadAllText(path))
+            ?? throw new InvalidOperationException("Empty room file: " + path);
+
+        room.Tags ??= new();
+
+        Tags? beta = room.Tags.FirstOrDefault(t => string.Equals(t.Tag, "beta", StringComparison.OrdinalIgnoreCase));
+        if (beta == null)
+        {
+            room.Tags.Insert(0, new("beta", 1));
+        }
+        else
+        {
+            beta.Type = 1;
+        }
+
+        return room;
+    }
+
     public static void Init(WebApplication app)
     {
         if (!File.Exists("ServerData/RoomNamesToIds.json"))
@@ -131,7 +153,7 @@ public static class Rooms
             {
                 if (roomNamesToIds.names[i].id == id)
                 {
-                    room = JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json"));
+                    room = LoadRoom("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json");
                 }
             }
 
@@ -192,12 +214,13 @@ public static class Rooms
 
         app.MapGet("/rooms", (string name, int include) =>
         {
-            if (!Directory.Exists("ServerData/Rooms/" + name))
+            string path = "ServerData/Rooms/" + name + "/info.json";
+            if (!File.Exists(path))
             {
-                // return Results.NotFound();
+                return Results.NotFound();
             }
-            
-            return File.ReadAllText("ServerData/Rooms/" + name + "/info.json");
+
+            return Results.Ok(LoadRoom(path));
         });
 
         app.MapGet("/rooms/bulk", (string name, bool? excludePrivateRooms) =>
@@ -209,23 +232,23 @@ public static class Rooms
 
             List<Room> rooms = new();
             
-            rooms.Add(JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/" + name + "/info.json")));
+            rooms.Add(LoadRoom("ServerData/Rooms/" + name + "/info.json"));
             
             return Results.Ok(rooms);
         });
 
         app.MapGet("/rooms/{id}", (int id, int include) =>
         {
-            if (Directory.Exists("ServerData/Rooms/" + id))
+            if (File.Exists("ServerData/Rooms/" + id + "/info.json"))
             {
-                return Results.Ok(JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/" + id + "/info.json")));
+                return Results.Ok(LoadRoom("ServerData/Rooms/" + id + "/info.json"));
             }
 
             for (int i = 0; i < roomNamesToIds.names.Count; i++)
             {
                 if (roomNamesToIds.names[i].id == id)
                 {
-                    return Results.Ok(JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json")));
+                    return Results.Ok(LoadRoom("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json"));
                 }
             }
 
@@ -237,7 +260,7 @@ public static class Rooms
             app.Logger.LogWarning("(Rooms) /rooms/hot STUB");
             
             List<Room> rooms = new();
-            rooms.Add(JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/RecCenter/info.json")));
+            rooms.Add(LoadRoom("ServerData/Rooms/RecCenter/info.json"));
             
             var pagedRooms = new
             {
@@ -292,82 +315,26 @@ public static class Rooms
 
         app.MapGet("/photon_access_token", () =>
         {
-            app.Logger.LogWarning("(Rooms) /photon_access_token STUB");
+            string[] granted = new[]
+            {
+                "CAN_USE_ROOM_RESET_BUTTON",
+                "CAN_USE_DELETE_ALL_BUTTON",
+                "CAN_SAVE_INVENTIONS",
+                "CAN_SPAWN_INVENTIONS",
+                "CAN_USE_PLAY_GIZMOS_TOGGLE",
+                "CAN_USE_MAKER_PEN"
+            };
 
-            List<PhotonPermission> permissions = new();
-            
-            permissions.Add(new()
-            {
-                Permission = "CAN_USE_ROOM_RESET_BUTTON",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_USE_DELETE_ALL_BUTTON",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_SAVE_INVENTIONS",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_SPAWN_INVENTIONS",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_USE_PLAY_GIZMOS_TOGGLE",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_USE_MAKER_PEN",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_USE_ROOM_RESET_BUTTON",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_USE_DELETE_ALL_BUTTON",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_SAVE_INVENTIONS",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_SPAWN_INVENTIONS",
-                Role = 0,
-                Override = true
-            });
-            permissions.Add(new()
-            {
-                Permission = "CAN_USE_PLAY_GIZMOS_TOGGLE",
-                Role = 0,
-                Override = true
-            });
-            
             PhotonAccessTokenObject accessToken = new()
             {
-                Permissions = permissions.ToArray(),
+                Permissions = granted.Select(permission => new PhotonPermission
+                {
+                    Permission = permission,
+                    Role = 0,
+                    Override = true
+                }).ToArray(),
                 PhotonAccessToken = "",
-                RoomInstanceId = Matchmaking.currentInstance.roomInstanceId
+                RoomInstanceId = Matchmaking.currentInstance?.roomInstanceId ?? 0
             };
 
             return accessToken;
@@ -404,7 +371,7 @@ public static class Rooms
             {
                 if (roomNamesToIds.names[i].id == roomId)
                 {
-                    room = JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json"));
+                    room = LoadRoom("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json");
                 }
             }
 
@@ -446,7 +413,7 @@ public static class Rooms
             {
                 if (roomNamesToIds.names[i].id == roomId)
                 {
-                    room = JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json"));
+                    room = LoadRoom("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json");
                 }
             }
 
@@ -508,7 +475,7 @@ public static class Rooms
             {
                 if (roomNamesToIds.names[i].id == roomId)
                 {
-                    room = JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json"));
+                    room = LoadRoom("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json");
                 }
             }
 
@@ -549,7 +516,7 @@ public static class Rooms
             app.Logger.LogWarning("(Rooms) /rooms/{{roomId}}/similar STUB");
 
             List<Room> rooms = new();
-            rooms.Add(JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/RecCenter/info.json")));
+            rooms.Add(LoadRoom("ServerData/Rooms/RecCenter/info.json"));
             
             var pagedRooms = new
             {
@@ -565,7 +532,7 @@ public static class Rooms
             app.Logger.LogWarning("(Rooms) /rooms/base STUB");
             
             List<Room> rooms = new();
-            rooms.Add(JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/MakerRoom/info.json")));
+            rooms.Add(LoadRoom("ServerData/Rooms/MakerRoom/info.json"));
 
             return rooms;
         });
@@ -591,16 +558,16 @@ public static class Rooms
         // 2020
         app.MapGet("/api/rooms/v4/details/{roomId}", (int roomId) =>
         {
-            if (Directory.Exists("ServerData/Rooms/" + roomId))
+            if (File.Exists("ServerData/Rooms/" + roomId + "/info.json"))
             {
-                return Results.Ok(JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/" + roomId + "/info.json")));
+                return Results.Ok(LoadRoom("ServerData/Rooms/" + roomId + "/info.json"));
             }
 
             for (int i = 0; i < roomNamesToIds.names.Count; i++)
             {
                 if (roomNamesToIds.names[i].id == roomId)
                 {
-                    return Results.Ok(JsonSerializer.Deserialize<Room>(File.ReadAllText("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json")));
+                    return Results.Ok(LoadRoom("ServerData/Rooms/" + roomNamesToIds.names[i].name + "/info.json"));
                 }
             }
 

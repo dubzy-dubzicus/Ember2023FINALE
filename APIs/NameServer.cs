@@ -4,55 +4,73 @@ namespace asdfasdf.APIs;
 
 public static class NameServer
 {
+    // Public entrypoint is Tailscale Funnel only. The backend itself stays on
+    // http://127.0.0.1:2059; clients must never be told to call that directly.
+    private const string PublicUrl = "https://ember.tail298318.ts.net";
+
     public static void Init(WebApplication app)
     {
-        if (!File.Exists("ServerData/ns.json"))
+        const string path = "ServerData/ns.json";
+
+        if (!File.Exists(path))
         {
-            string url = "https://127.0.0.1";
             NameServerResponse ns = new()
             {
-                Accounts = url,
-                AI = url,
-                API = url,
-                Auth = url,
-                BugReporting = url,
-                Cards = url,
-                CDN = url,
-                Chat = url,
-                Clubs = url,
-                CMS = url,
-                Commerce = url,
-                Data = url,
-                DataCollection = url,
-                Discovery = url,
-                Econ = url,
-                GameLogs = url,
-                Geo = url,
-                Images = url + "/img",
-                Leaderboard = url,
-                Link = url,
-                Lists = url,
-                Matchmaking = url,
-                Moderation = url,
-                Notifications = url,
-                PlatformNotifications = url,
-                PlayerSettings = url,
-                RoomComments = url,
-                RoomieIntegrations = url,
-                Rooms = url,
-                Storage = url,
-                Strings = url,
-                StringsCDN = url,
-                Studio = url,
-                StudioCDN = url,
-                Thorn = url,
-                Videos = url,
-                WWW = url
+                Accounts = PublicUrl,
+                AI = PublicUrl,
+                API = PublicUrl,
+                Auth = PublicUrl,
+                BugReporting = PublicUrl,
+                Cards = PublicUrl,
+                CDN = PublicUrl,
+                Chat = PublicUrl,
+                Clubs = PublicUrl,
+                CMS = PublicUrl,
+                Commerce = PublicUrl,
+                Data = PublicUrl,
+                DataCollection = PublicUrl,
+                Discovery = PublicUrl,
+                Econ = PublicUrl,
+                GameLogs = PublicUrl,
+                Geo = PublicUrl,
+                Images = PublicUrl + "/img",
+                Leaderboard = PublicUrl,
+                Link = PublicUrl,
+                Lists = PublicUrl,
+                Matchmaking = PublicUrl,
+                Moderation = PublicUrl,
+                Notifications = PublicUrl,
+                PlatformNotifications = PublicUrl,
+                PlayerSettings = PublicUrl,
+                RoomComments = PublicUrl,
+                RoomieIntegrations = PublicUrl,
+                Rooms = PublicUrl,
+                Storage = PublicUrl,
+                Strings = PublicUrl,
+                StringsCDN = PublicUrl,
+                Studio = PublicUrl,
+                StudioCDN = PublicUrl,
+                Thorn = PublicUrl,
+                Videos = PublicUrl,
+                WWW = PublicUrl
             };
-            
-            File.WriteAllText("ServerData/ns.json", JsonSerializer.Serialize(ns));
+
+            File.WriteAllText(path, JsonSerializer.Serialize(ns));
         }
-        
-        app.MapGet("/", () => File.ReadAllText("ServerData/ns.json"));
+        else
+        {
+            // Repair older generated files that still point clients at loopback.
+            string current = File.ReadAllText(path);
+            string repaired = current
+                .Replace("http://127.0.0.1", PublicUrl)
+                .Replace("https://127.0.0.1", PublicUrl);
+
+            if (!string.Equals(current, repaired, StringComparison.Ordinal))
+            {
+                File.WriteAllText(path, repaired);
+            }
+        }
+
+        app.MapGet("/", () => File.ReadAllText(path));
     }
 }
