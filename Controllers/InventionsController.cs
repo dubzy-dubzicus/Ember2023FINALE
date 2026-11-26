@@ -12,29 +12,63 @@ namespace Ember2023.Controllers
     public class InventionsController : ControllerBase
     {
         [HttpGet("v2/mine")]
+        [HttpGet("v1/mine")]
         public IActionResult GetMyInventions()
         {
             var id = AuthStuff.GetPlayerId(Request);
             if (id == null)
                 return Unauthorized();
 
-            var inventions = InventionsDB.GetInventionsByAccount((long)id);
-            return Ok(new
-            {
-                Results = inventions.Select(inv => new
-                {
-                    inventionId = inv.InventionId,
-                    name = inv.Name,
-                    description = inv.Description,
-                    imageName = inv.ImageName,
-                    version = inv.Version,
-                    isPublic = inv.IsPublic,
-                    createdAt = inv.CreatedAt,
-                    updatedAt = inv.UpdatedAt
-                }).ToList(),
-                TotalResults = inventions.Count
-            });
+            var inventions = InventionsDB.GetInventionsByAccount((long)id)
+                .Select(ToClientInvention)
+                .ToList();
+            return Ok(inventions);
         }
+
+        [HttpGet("v1/featured")]
+        public IActionResult GetFeaturedInventions() => Ok(Array.Empty<object>());
+
+        private static object ToClientInvention(InventionsDB.Invention inv) => new
+        {
+            InventionId = inv.InventionId,
+            Id = inv.InventionId,
+            ReplicationId = inv.InventionId,
+            Name = inv.Name,
+            InventionName = inv.Name,
+            Description = inv.Description,
+            CreatorAccountId = inv.AccountId,
+            CreatorPlayerId = inv.AccountId,
+            CreatorId = inv.AccountId,
+            RoomId = 0,
+            ImageName = inv.ImageName,
+            Image = inv.ImageName,
+            PreviewImageName = inv.ImageName,
+            DataBlob = inv.BlueprintJson,
+            DataBlobName = "",
+            DataBlobPath = "",
+            DataBlobUrl = "",
+            HasValidObjects = true,
+            CanSpawn = true,
+            Tags = new List<string>(),
+            TagNames = new List<string>(),
+            CurrentVersionNumber = Math.Max(1, inv.Version),
+            Version = Math.Max(1, inv.Version),
+            Accessibility = 1,
+            IsPublished = inv.IsPublic,
+            Published = inv.IsPublic,
+            IsPublic = inv.IsPublic,
+            IsFeatured = false,
+            Price = 0,
+            AllowTrial = true,
+            CheerCount = 0,
+            Uses = 0,
+            NumDownloads = 0,
+            CreatedAt = inv.CreatedAt,
+            FirstPublishedAt = inv.CreatedAt,
+            ModifiedAt = inv.UpdatedAt,
+            UpdatedAt = inv.UpdatedAt,
+            LastUpdated = inv.UpdatedAt
+        };
 
         [HttpGet("v2/{inventionId}")]
         public IActionResult GetInvention(string inventionId)

@@ -142,30 +142,44 @@ namespace Ember2023.Classes.DBs
 
         public static (List<Room> Results, int Total) GetHotRooms(string tag, int skip, int take)
         {
-            string t = tag?.ToLower();
-            var query = Rooms.Query().Where(r => !r.IsDorm);
+            string? t = tag?.ToLowerInvariant();
             bool isRRO = (t == "rro" || t == "recroomoriginal");
 
-            if (isRRO) 
+            var candidates = Rooms.FindAll()
+                .Where(r => !r.IsDorm)
+                .ToList();
+
+            if (isRRO)
             {
-                query = query.Where("Tags[*].Tag ANY IN ['rro', 'recroomoriginal']");
+                candidates = candidates
+                    .Where(r => r.Tags != null && r.Tags.Any(tagRow =>
+                        string.Equals(tagRow.Tag, "rro", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(tagRow.Tag, "recroomoriginal", StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
             }
-            else if (t != "new") 
+            else if (t != "new")
             {
-                query = query.Where("Tags[*].Tag ALL NOT IN ['base', 'rro', 'recroomoriginal']");
+                candidates = candidates
+                    .Where(r => r.Tags == null || !r.Tags.Any(tagRow =>
+                        string.Equals(tagRow.Tag, "base", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(tagRow.Tag, "rro", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(tagRow.Tag, "recroomoriginal", StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
             }
 
-            if (!isRRO) 
+            if (!isRRO)
             {
-                query = query.Where(r => r.Accessibility == RoomAccessibility.Public);
+                candidates = candidates
+                    .Where(r => r.Accessibility == RoomAccessibility.Public)
+                    .ToList();
             }
 
-            var finalQuery = (t == "new") 
-                ? query.OrderByDescending(r => r.CreatedAt) 
-                : query.OrderByDescending(r => r.Stats.VisitCount);
+            var ordered = (t == "new")
+                ? candidates.OrderByDescending(r => r.CreatedAt)
+                : candidates.OrderByDescending(r => r.Stats?.VisitCount ?? 0);
 
-            var results = finalQuery.Skip(skip).Limit(take).ToList();
-            int total = finalQuery.Count();
+            var results = ordered.Skip(skip).Take(take).ToList();
+            int total = candidates.Count;
 
             return (results, total);
         }

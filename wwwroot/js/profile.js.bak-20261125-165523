@@ -1,0 +1,76 @@
+const username = document.getElementById('profileUsername').textContent;
+
+async function loadProfileData() {
+    try {
+        const resp = await fetch(`/api/players/v1/${encodeURIComponent(username)}`);
+        console.log('[profile] player API response status:', resp.status);
+        const raw = await resp.text();
+        console.log('[profile] raw player API response:', raw);
+        if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}: ${raw}`);
+        }
+        const data = JSON.parse(raw);
+        console.log('[profile] parsed player data:', data);
+        document.getElementById('roomsCount').textContent = data.roomsCount ?? 0;
+        document.getElementById('inventionsCount').textContent = data.inventionsCount ?? 0;
+        document.getElementById('friendsCount').textContent = data.friendsCount ?? 0;
+    } catch (e) {
+        console.error('[profile] failed to load profile stats', e);
+    }
+}
+
+function setProfileTab(tab, btn) {
+    document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadProfileContent(tab);
+}
+
+async function loadProfileContent(tab) {
+    const content = document.getElementById('profileContent');
+    content.innerHTML = '<div class="empty-state"><h2>Loading…</h2><p class="no-data">Fetching data…</p></div>';
+
+    try {
+        let endpoint = '';
+        switch (tab) {
+            case 'rooms': endpoint = `/api/rooms/v1/user/${encodeURIComponent(username)}`; break;
+            default: endpoint = `/api/feed/v1/user/${encodeURIComponent(username)}`; break;
+        }
+
+        const resp = await fetch(endpoint);
+        console.log('[profile] API response status:', resp.status, 'for', endpoint);
+        const raw = await resp.text();
+        console.log('[profile] raw API response:', raw);
+        if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}: ${raw}`);
+        }
+        const data = JSON.parse(raw);
+        console.log('[profile] parsed content:', data);
+
+        content.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            content.innerHTML = '<div class="empty-state"><h2>No items</h2><p class="no-data">No items found in this section.</p></div>';
+            return;
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'profile-grid';
+        content.appendChild(grid);
+
+        data.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            card.innerHTML = `
+                <h3>${item.name || item.title || item.caption || 'Untitled'}</h3>
+                <p>${item.description || 'No description available'}</p>
+            `;
+            grid.appendChild(card);
+        });
+    } catch (e) {
+        console.error('[profile] failed to load content:', e);
+        content.innerHTML = '<div class="empty-state"><h2>Error loading content</h2><p class="no-data">Unable to fetch profile data.</p></div>';
+    }
+}
+
+loadProfileData();
+loadProfileContent('feed');

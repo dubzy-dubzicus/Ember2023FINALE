@@ -1,15 +1,36 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "News";
+    ViewData["Active"] = "news";
     Layout = "_Layout";
 }
 
-@section Scripts {
-<script src="~/js/news.js"></script>
-}
-
-<section class="news-grid" id="newsGrid">
-    <div class="empty-state">
-        <h2>Loading news...</h2>
-        <p class="no-data">Fetching latest news from server...</p>
+<section class="page-hero">
+    <div class="container">
+        <div class="eyebrow">Network updates</div>
+        <h1>News &amp; <span class="gradient-text">announcements</span></h1>
+        <p>Server notes, community milestones, and everything happening across Ember Network.</p>
     </div>
 </section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Latest posts</h2>
+                <p class="section-subtitle">Newest updates appear first.</p>
+            </div>
+            <span class="status-pill"><span class="pulse-dot"></span>Feed live</span>
+        </div>
+        <div class="news-grid" id="newsGrid">
+            <div class="empty-state">
+                <h2>Loading news…</h2>
+                <p class="no-data">Fetching the latest announcements from the server.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/news.js" asp-append-version="true"></script>
+}

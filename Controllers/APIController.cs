@@ -386,8 +386,6 @@ namespace Ember2023.Controllers
         [HttpGet("/api/announcement/v1/get")]
         [HttpGet("/api/PlayerReporting/v1/voteToKickReasons")]
         [HttpGet("/api/avatar/v3/saved")]
-        [HttpGet("/api/equipment/v2/getUnlocked")]
-        [HttpGet("/api/consumables/v2/getUnlocked")]
         [HttpGet("/api/images/v2/named")]
         [HttpGet("/api/avatar/v2/gifts")]
         [HttpGet("/api/gamerewards/v1/pending")]

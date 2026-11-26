@@ -1,48 +1,84 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Room";
+    ViewData["Active"] = "search";
     Layout = "_Layout";
 }
 
+<section class="room-cover">
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="/">Home</a><span class="sep">/</span>
+            <a href="/Search?tab=rooms">Rooms</a><span class="sep">/</span>
+            <span>Room details</span>
+        </div>
+        <div class="room-title-row">
+            <div class="room-badge" id="roomBadge">R</div>
+            <div>
+                <div class="eyebrow">Community room</div>
+                <h1 id="roomTitle">Loading room…</h1>
+                <div class="room-owner">Owner: <a id="roomOwnerLink" href="#"><span id="roomOwnerName">—</span></a></div>
+            </div>
+        </div>
+        <div class="room-actions">
+            <button type="button" class="btn btn-play" id="playButton">
+                <svg class="icon"><use href="#i-play"></use></svg>Play in client
+            </button>
+            <button type="button" class="btn btn-secondary" id="copyRoomLinkButton">
+                <svg class="icon"><use href="#i-copy"></use></svg>Copy room link
+            </button>
+            <a href="#" class="btn btn-ghost" id="ownerProfileButton">
+                <svg class="icon"><use href="#i-user"></use></svg>Owner profile
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container room-main">
+        <div>
+            <div class="room-image-container" id="roomMedia">
+                <img id="roomImage" class="room-image" alt="Room preview" hidden />
+                <div class="media-fallback" id="roomFallback"><span>R</span></div>
+            </div>
+
+            <div class="panel">
+                <h3><svg class="icon"><use href="#i-news"></use></svg>About this room</h3>
+                <div class="room-description" id="roomDescription">Loading room description…</div>
+            </div>
+
+            <div class="panel">
+                <h3><svg class="icon"><use href="#i-sparkles"></use></svg>Tags</h3>
+                <div class="room-tags" id="roomTags"><span class="no-data">Loading tags…</span></div>
+            </div>
+        </div>
+
+        <aside class="room-sidebar">
+            <div class="sidebar-card">
+                <h3>Room info</h3>
+                <div class="detail-row"><span>Room ID</span><strong id="roomIdDisplay">—</strong></div>
+                <div class="detail-row"><span>Owner</span><strong id="roomOwnerNameSide">—</strong></div>
+                <div class="detail-row"><span>Capacity</span><strong id="roomCapacity">—</strong></div>
+                <div class="detail-row"><span>Platforms</span><strong id="roomPlatforms">PC, VR</strong></div>
+                <div class="detail-row"><span>Network</span><strong>Ember Cloud</strong></div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3>Players in room</h3>
+                <div id="roomPlayers"><p class="no-data">Loading players…</p></div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3>Room tools</h3>
+                <p class="no-data" style="margin-bottom:14px">Share this room with friends or open the owner's profile.</p>
+                <button type="button" class="btn btn-secondary btn-sm" data-copy-url style="width:100%">
+                    <svg class="icon"><use href="#i-copy"></use></svg>Copy link
+                </button>
+            </div>
+        </aside>
+    </div>
+</section>
+
 @section Scripts {
-<script src="~/js/room.js"></script>
+    <script src="~/js/room.js" asp-append-version="true"></script>
 }
-
-<section class="room-header">
-    <div class="container">
-        <h1 id="roomTitle">Loading Room...</h1>
-        <div class="room-owner" id="roomOwner">Owner: <span id="roomOwnerName">-</span></div>
-    </div>
-</section>
-
-<div class="room-main">
-    <div class="container">
-        <div class="room-image-container">
-            <img id="roomImage" src="https://via.placeholder.com/800x400/333333/ffffff?text=Room+Preview" alt="Room Preview" class="room-image">
-        </div>
-        <div class="room-info">
-            <div class="room-tags" id="roomTags"></div>
-            <div class="room-actions">
-                <a href="#" class="btn btn-play">Play</a>
-                <a href="#" class="btn btn-meetup">Meetup</a>
-            </div>
-            <div class="room-description" id="roomDescription">
-                <p>Loading room description...</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="room-sidebar">
-        <div class="sidebar-card">
-            <h3>Room Info</h3>
-            <p><strong>Room ID:</strong> <span id="roomIdDisplay">-</span></p>
-            <p><strong>Capacity:</strong> <span id="roomCapacity">-</span></p>
-            <p><strong>Platforms:</strong> <span id="roomPlatforms">PC, VR</span></p>
-        </div>
-        <div class="sidebar-card">
-            <h3>Players in Room</h3>
-            <div id="roomPlayers">
-                <p class="no-data">Loading players...</p>
-            </div>
-        </div>
-    </div>
-</section>

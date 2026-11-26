@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "News";
+    Layout = "_Layout";
+}
+
+@section Scripts {
+<script src="~/js/news.js"></script>
+}
+
+<section class="news-grid" id="newsGrid">
+    <div class="empty-state">
+        <h2>Loading news...</h2>
+        <p class="no-data">Fetching latest news from server...</p>
+    </div>
+</section>

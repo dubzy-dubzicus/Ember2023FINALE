@@ -70,9 +70,11 @@ namespace Ember2023.Controllers
         }
         
         [HttpGet("rooms/hot")]
-        public IActionResult HotRooms(string tag, int skip = 0, int take = 30)
+        public IActionResult HotRooms([FromQuery] string? tag = null, [FromQuery] int skip = 0, [FromQuery] int take = 30)
         {
-            var (results, total) = RoomDB.GetHotRooms(tag, skip, take);
+            skip = Math.Max(0, skip);
+            take = Math.Min(100, Math.Max(1, take));
+            var (results, total) = RoomDB.GetHotRooms(tag ?? "hot", skip, take);
 
             return Ok(new 
             {

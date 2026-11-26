@@ -1,31 +1,163 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Home";
+    ViewData["Active"] = "home";
     Layout = "_Layout";
 }
 
 <section class="hero">
-    <div class="container">
-        <h1>Welcome to Ember Network</h1>
-        <p>Self-hosted Rec Room server powered by Ember. Connect, create, and explore with your friends.</p>
-        <div class="hero-actions">
-            <a href="/Search" class="btn btn-primary">Explore Rooms</a>
-            <a href="/Profile/dubzy" class="btn btn-secondary">View Profile</a>
+    <div class="container hero-layout">
+        <div class="hero-copy">
+            <div class="eyebrow">Self-hosted · Community built</div>
+            <h1>Your world.<br />Your rooms.<br /><span class="gradient-text">Your network.</span></h1>
+            <p>Explore community-made rooms, meet players, share inventions, and keep everything on an Ember server you control.</p>
+            <div class="hero-actions">
+                <a href="/Search?tab=rooms" class="btn btn-primary">
+                    <svg class="icon"><use href="#i-room"></use></svg>Explore rooms
+                </a>
+                <a href="/News" class="btn btn-secondary">
+                    <svg class="icon"><use href="#i-news"></use></svg>Latest news
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <strong id="roomCount">—</strong>
+                    <span>Public rooms</span>
+                </div>
+                <div class="hero-stat">
+                    <strong>100+</strong>
+                    <span>Player ready</span>
+                </div>
+                <div class="hero-stat">
+                    <strong>24/7</strong>
+                    <span>Community hosted</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+            <div class="visual-glow"></div>
+            <div class="visual-card visual-card-main">
+                <div class="visual-card-top">
+                    <span>RecCenter · Live room</span>
+                    <span class="dots"><i></i><i></i><i></i></span>
+                </div>
+                <div class="visual-scene">
+                    <div class="visual-sun"></div>
+                    <div class="visual-figure one"></div>
+                    <div class="visual-figure two"></div>
+                    <div class="visual-figure three"></div>
+                </div>
+                <div class="visual-card-bottom">
+                    <div>
+                        <strong>Play together now</strong>
+                        <span>12 player capacity · Official hub</span>
+                    </div>
+                    <span class="status-pill"><span class="pulse-dot"></span>Online</span>
+                </div>
+            </div>
+            <div class="visual-chip chip-one">
+                <span class="chip-icon"><svg class="icon"><use href="#i-users"></use></svg></span>
+                Friends online
+            </div>
+            <div class="visual-chip chip-two">
+                <span class="chip-icon"><svg class="icon"><use href="#i-sparkles"></use></svg></span>
+                New inventions
+            </div>
         </div>
     </div>
 </section>
 
-<section class="featured-rooms">
+<section class="section section-alt" id="rooms">
     <div class="container">
-        <h2 class="section-title">Featured Rooms</h2>
+        <div class="section-head">
+            <div>
+                <div class="eyebrow">Discover</div>
+                <h2 class="section-title">Featured rooms</h2>
+                <p class="section-subtitle">Jump into a room built by the community. Every card links to its room page.</p>
+            </div>
+            <a href="/Search?tab=rooms" class="section-action">Browse all rooms <svg class="icon"><use href="#i-arrow"></use></svg></a>
+        </div>
+
+        <div class="filter-bar" role="group" aria-label="Sort rooms">
+            <button type="button" class="filter-chip active" data-room-sort="featured">Featured</button>
+            <button type="button" class="filter-chip" data-room-sort="capacity">Capacity</button>
+            <button type="button" class="filter-chip" data-room-sort="name">A–Z</button>
+            <button type="button" class="filter-chip" data-room-sort="newest">Newest</button>
+        </div>
+
         <div class="rooms-grid" id="roomsGrid">
             <div class="empty-state">
-                <h2>Loading rooms...</h2>
-                <p class="no-data">Fetching room data from server...</p>
+                <h2>Loading rooms…</h2>
+                <p class="no-data">Fetching live room data from the server.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="community">
+    <div class="container community-layout">
+        <div class="community-panel">
+            <div class="eyebrow">Community pulse</div>
+            <h2 class="section-title">Made by players,<br />kept by players.</h2>
+            <p class="section-subtitle">Creators keep building, publishing, and inviting friends back. Here is a snapshot of the network right now.</p>
+            <div class="community-grid">
+                <div class="community-stat">
+                    <strong id="communityRooms">—</strong>
+                    <span>Rooms live</span>
+                </div>
+                <div class="community-stat">
+                    <strong id="communityCreators">—</strong>
+                    <span>Active creators</span>
+                </div>
+                <div class="community-stat">
+                    <strong id="communityCapacity">—</strong>
+                    <span>Total capacity</span>
+                </div>
+                <div class="community-stat">
+                    <strong>Photon</strong>
+                    <span>Cloud linked</span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-head">
+                <div>
+                    <div class="eyebrow">Top creators</div>
+                    <h2 class="section-title">Building the network</h2>
+                </div>
+                <a href="/Search?tab=people" class="section-action">Find people <svg class="icon"><use href="#i-arrow"></use></svg></a>
+            </div>
+            <div class="creator-list" id="creatorList">
+                <div class="empty-state">
+                    <h2>Loading creators…</h2>
+                    <p class="no-data">Counting rooms by owner.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-alt" id="news">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <div class="eyebrow">Network updates</div>
+                <h2 class="section-title">Latest news</h2>
+                <p class="section-subtitle">Announcements and server notes from the Ember network.</p>
+            </div>
+            <a href="/News" class="section-action">All news <svg class="icon"><use href="#i-arrow"></use></svg></a>
+        </div>
+        <div class="news-grid news-grid-compact" id="newsPreviewGrid">
+            <div class="empty-state">
+                <h2>Loading news…</h2>
+                <p class="no-data">Fetching announcements.</p>
             </div>
         </div>
     </div>
 </section>
 
 @section Scripts {
-<script src="~/js/home.js"></script>
+    <script src="~/js/home.js" asp-append-version="true"></script>
 }

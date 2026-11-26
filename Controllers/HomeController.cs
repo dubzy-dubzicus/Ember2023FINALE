@@ -6,7 +6,7 @@ namespace Ember2023.Controllers
     public class HomeController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly string _apiBase = "http://localhost:2059";
+        private readonly string _apiBase = Ember2023.Classes.ServerConfig.BaseURL;
 
         public HomeController(IHttpClientFactory httpClientFactory)
         {

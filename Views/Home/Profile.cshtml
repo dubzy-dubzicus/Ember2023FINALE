@@ -1,48 +1,79 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Profile";
+    ViewData["Active"] = "search";
     Layout = "_Layout";
 }
 
-@section Scripts {
-<script src="~/js/profile.js"></script>
-}
-
-<section class="profile-header">
+<section class="profile-cover">
     <div class="container">
-        <div class="profile-avatar">👤</div>
-        <h1 id="profileUsername">@Model</h1>
-        <div class="username"><span id="usernameDisplay">@Model</span></div>
-        <div class="profile-stats">
-            <div class="stat">
-                <span class="stat-value" id="roomsCount">-</span>
-                <span class="stat-label">Rooms</span>
+        <div class="profile-hero">
+            <div class="profile-avatar">
+                <img id="profileAvatarImage" alt="" hidden />
+                <span id="profileAvatarInitial">?</span>
             </div>
-            <div class="stat">
-                <span class="stat-value" id="inventionsCount">-</span>
-                <span class="stat-label">Inventions</span>
+            <div class="profile-identity">
+                <div class="eyebrow">Player profile</div>
+                <h1 id="profileUsername">@Model</h1>
+                <div class="username" id="usernameDisplay">@Model</div>
+                <div class="profile-badges">
+                    <span class="badge badge-accent"><svg class="icon"><use href="#i-shield"></use></svg>Ember member</span>
+                    <span class="badge">Account <span id="profileAccountId">—</span></span>
+                    <span class="badge"><svg class="icon"><use href="#i-zap"></use></svg>Active</span>
+                </div>
+                <p class="section-subtitle" id="profileBio">Loading profile details…</p>
             </div>
-            <div class="stat">
-                <span class="stat-value" id="friendsCount">-</span>
-                <span class="stat-label">Friends</span>
+            <div class="profile-stats">
+                <div class="stat">
+                    <span class="stat-value" id="roomsCount">—</span>
+                    <span class="stat-label">Rooms</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="inventionsCount">—</span>
+                    <span class="stat-label">Inventions</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="friendsCount">—</span>
+                    <span class="stat-label">Friends</span>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<div class="profile-tabs">
-    <button class="profile-tab active" onclick="setProfileTab('feed', this)">Feed</button>
-    <button class="profile-tab" onclick="setProfileTab('photos', this)">Photos</button>
-    <button class="profile-tab" onclick="setProfileTab('rooms', this)">Rooms</button>
-    <button class="profile-tab" onclick="setProfileTab('events', this)">Events</button>
-</div>
-
-<section class="profile-content">
+<section class="section">
     <div class="container">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Activity</h2>
+                <p class="section-subtitle">Public rooms and inventions from this player.</p>
+            </div>
+            <a href="/Search?tab=people" class="section-action">Back to search <svg class="icon"><use href="#i-arrow"></use></svg></a>
+        </div>
+
+        <div class="profile-tabs" id="profileTabs">
+            <button type="button" class="profile-tab active" data-profile-tab="feed">
+                <svg class="icon"><use href="#i-sparkles"></use></svg>Feed
+            </button>
+            <button type="button" class="profile-tab" data-profile-tab="rooms">
+                <svg class="icon"><use href="#i-room"></use></svg>Rooms
+            </button>
+        </div>
+
+        <div class="results-meta" id="profileMeta">
+            <span>Loading public activity…</span>
+            <span class="status-pill"><span class="pulse-dot"></span>Public data</span>
+        </div>
+
         <div id="profileContent">
             <div class="empty-state">
-                <h2>Loading profile...</h2>
-                <p class="no-data">Fetching profile data...</p>
+                <h2>Loading profile…</h2>
+                <p class="no-data">Fetching data from the server.</p>
             </div>
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script src="~/js/profile.js" asp-append-version="true"></script>
+}

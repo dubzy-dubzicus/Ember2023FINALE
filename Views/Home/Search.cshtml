@@ -1,36 +1,61 @@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    ViewData["Title"] = "Search";
+    ViewData["Title"] = "Explore";
+    ViewData["Active"] = "search";
     Layout = "_Layout";
 }
 
-@section Scripts {
-<script src="~/js/search.js"></script>
-}
-
-<section class="search-header">
+<section class="page-hero">
     <div class="container">
-        <h1>Search Ember Network</h1>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search players, rooms, inventions...">
-            <button onclick="search()">Search</button>
-        </div>
+        <div class="eyebrow">Explore the network</div>
+        <h1>Find people, rooms &amp; <span class="gradient-text">inventions</span></h1>
+        <p>Search the live Ember database for players, community rooms, and public creations.</p>
     </div>
 </section>
 
-<div class="search-tabs">
-    <button class="search-tab active" onclick="setTab('people', this)">People</button>
-    <button class="search-tab" onclick="setTab('rooms', this)">Rooms</button>
-    <button class="search-tab" onclick="setTab('events', this)">Events</button>
-    <button class="search-tab" onclick="setTab('inventions', this)">Inventions</button>
-</div>
-
-<section class="search-results">
+<section class="section">
     <div class="container">
+        <div class="search-console">
+            <div class="search-bar">
+                <svg class="icon icon-lg"><use href="#i-search"></use></svg>
+                <input type="search" id="searchInput" placeholder="Try “dubzy”, “Rec”, or “maker”…" autocomplete="off" aria-label="Search Ember Network" />
+                <button type="button" class="btn btn-primary" id="searchButton">
+                    <svg class="icon"><use href="#i-arrow"></use></svg>Search
+                </button>
+            </div>
+            <div class="filter-bar" style="margin-top:14px;margin-bottom:0" aria-label="Example searches">
+                <button type="button" class="filter-chip" data-quick-search="dubzy" data-tab="people">Player: dubzy</button>
+                <button type="button" class="filter-chip" data-quick-search="Rec" data-tab="rooms">Room: Rec</button>
+                <button type="button" class="filter-chip" data-quick-search="a" data-tab="inventions">Inventions</button>
+            </div>
+        </div>
+
+        <div class="search-tabs" id="searchTabs">
+            <button type="button" class="search-tab active" data-tab="people">
+                <svg class="icon"><use href="#i-user"></use></svg>People
+            </button>
+            <button type="button" class="search-tab" data-tab="rooms">
+                <svg class="icon"><use href="#i-room"></use></svg>Rooms
+            </button>
+            <button type="button" class="search-tab" data-tab="inventions">
+                <svg class="icon"><use href="#i-sparkles"></use></svg>Inventions
+            </button>
+        </div>
+
+        <div class="results-meta" id="resultsMeta">
+            <span>Enter a search term to find people, rooms, and inventions.</span>
+            <span class="status-pill"><span class="pulse-dot"></span>Live search</span>
+        </div>
+
         <div class="results-grid" id="resultsGrid">
             <div class="empty-state">
-                <h2>Search results</h2>
-                <p class="no-data">Enter a search term to find people, rooms, events, and inventions.</p>
+                <h2>Ready to search</h2>
+                <p class="no-data">Pick a category and start typing above.</p>
             </div>
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script src="~/js/search.js" asp-append-version="true"></script>
+}

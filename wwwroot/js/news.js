@@ -1,31 +1,45 @@
-async function loadNews() {
-    try {
-        const resp = await fetch('/api/news/v1/all');
-        const data = await resp.json();
-        const grid = document.getElementById('newsGrid');
-        grid.innerHTML = '';
-        
-        if (!data || data.length === 0) {
-            grid.innerHTML = '<div class="empty-state"><h2>No news available</h2><p class="no-data">No news articles found.</p></div>';
-            return;
-        }
-        
-        data.forEach(article => {
-            const card = document.createElement('div');
-            card.className = 'news-card';
-            card.innerHTML = `
-                <img src="${article.ImageUrl || 'https://via.placeholder.com/400x200/333333/ffffff?text=News'}" alt="${article.Title}">
-                <div class="news-card-content">
-                    <h3>${article.Title}</h3>
-                    <p>${article.Summary || article.Content?.substring(0, 150) || ''}...</p>
-                    <span class="news-card-date">${new Date(article.CreatedAt || Date.now()).toLocaleDateString()}</span>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-    } catch (e) {
-        document.getElementById('newsGrid').innerHTML = '<div class="empty-state"><h2>Error loading news</h2><p class="no-data">Unable to connect to server.</p></div>';
-    }
-}
+(function () {
+    'use strict';
 
-loadNews();
+    const S = window.EmberSite;
+
+    async function loadNews() {
+        const grid = document.getElementById('newsGrid');
+        if (!grid) return;
+
+        try {
+            const data = await S.apiGet('/api/news/v1/all');
+            const articles = Array.isArray(data) ? data : [];
+
+            if (!articles.length) {
+                grid.innerHTML = '<div class="empty-state"><h2>No news available</h2><p class="no-data">No announcements have been posted yet.</p></div>';
+                return;
+            }
+
+            grid.innerHTML = articles.map(article => {
+                const title = article.title || 'Untitled update';
+                const summary = article.summary || article.content || 'No summary provided.';
+                const date = S.formatDate(article.createdAt);
+
+                return '<article class="card">' +
+                    '<div class="card-media">' +
+                        S.mediaHtml(title, article.imageUrl, 900, 500) +
+                        '<span class="card-badge">Update</span>' +
+                    '</div>' +
+                    '<div class="card-body">' +
+                        '<div class="news-card-date"><svg class="icon"><use href="#i-calendar"></use></svg> ' + S.escapeHtml(date) + '</div>' +
+                        '<div class="card-title" style="margin-top:10px">' + S.escapeHtml(title) + '</div>' +
+                        '<div class="card-desc" style="-webkit-line-clamp:4">' + S.escapeHtml(summary) + '</div>' +
+                        '<div class="card-meta">' +
+                            '<span class="card-meta-item"><svg class="icon"><use href="#i-sparkles"></use></svg>Ember Network</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</article>';
+            }).join('');
+        } catch (e) {
+            grid.innerHTML = '<div class="error-state"><h2>Unable to load news</h2><p class="no-data">' + S.escapeHtml(e.message) + '</p></div>';
+        }
+    }
+
+    loadNews();
+})();

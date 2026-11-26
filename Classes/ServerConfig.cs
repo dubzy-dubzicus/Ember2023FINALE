@@ -10,7 +10,9 @@ namespace Ember2023.Classes
     public class ServerConfig
     {
         public static object Bracket => new List<object>(); 
-        public static string BaseURL = "https://desktop-am0r41g.tail298318.ts.net"; // replace with your url
+        // Self-hosted through Tailscale Funnel; override with EMBER_BASE_URL if needed.
+        public static string BaseURL = Environment.GetEnvironmentVariable("EMBER_BASE_URL")
+            ?? "https://ember.tail298318.ts.net";
         public static int GameVersion = 20230406;
     }
 }
